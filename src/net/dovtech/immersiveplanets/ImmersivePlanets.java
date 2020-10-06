@@ -249,56 +249,6 @@ public class ImmersivePlanets extends StarMod {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-                    /*
-                    if (clouds == null) {
-                        clouds = new Mesh();
-                        clouds.setPos(event.getSphere().getPos());
-                        Vector3f scale = event.getSphere().getScale();
-                        scale.scale(3.5f)
-                        clouds.setScale(scale);
-                        Transform transform = event.getSphere().getTransform();
-                        transform.origin.scale(3.5f);
-                        clouds.setTransform(transform);
-                        clouds.updateBound();
-                        clouds.setBoundingSphereRadius(planetRadius);
-                        cloudsMaterial = new Material();
-                        String cloudsTexturePath = "clouds.png";
-                        cloudsTexture = Controller.getTexLoader().getTexture2D(cloudsTexturePath, true);
-                        cloudsMaterial.setTexture(cloudsTexture);
-                    }
-
-                    if (clouds != null && cloudsMaterial != null && cloudsTexture != null) {
-                        clouds.setMaterial(cloudsMaterial);
-                        clouds.draw();
-                    }
-
-
-                    if (event.getPlanetType().equals(SectorInformation.PlanetType.ICE)) {
-                        if (icePlanetMaterial == null || icePlanetTexture == null) {
-                            icePlanetMaterial = new Material();
-                            String icePlanetTexturePath = "ice-planet.png";
-                            icePlanetTexture = Controller.getTexLoader().getTexture2D(icePlanetTexturePath,true);
-                            icePlanetMaterial.setTexture(icePlanetTexture);
-                            icePlanetMaterial.attach(0);
-                        } else {
-                            event.getSphere().setMaterial(icePlanetMaterial);
-                            event.getSphere().draw();
-                        }
-                    } else if (event.getPlanetType().equals(SectorInformation.PlanetType.DESERT)) {
-                        if (desertPlanetMaterial == null || desertPlanetTexture == null) {
-                            desertPlanetMaterial = new Material();
-                            String desertPlanetTexturePath = "desert-planet.png";
-                            desertPlanetTexture = Controller.getTexLoader().getTexture2D(desertPlanetTexturePath, true);
-                            desertPlanetMaterial.setTexture(desertPlanetTexture);
-                            desertPlanetMaterial.attach(0);
-                        } else {
-                            event.getSphere().setMaterial(desertPlanetMaterial);
-                            event.getSphere().draw();
-                        }
-                    }
-
-                     */
             }
         });
 
@@ -317,9 +267,5 @@ public class ImmersivePlanets extends StarMod {
 
     public static ImmersivePlanets getInstance() {
         return inst;
-    }
-
-    public FileConfiguration getConfig() {
-        return this.config;
     }
 }
