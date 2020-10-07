@@ -7,7 +7,7 @@ import org.schema.game.common.data.player.PlayerState;
 public class DebugSphereCommand extends ChatCommand {
 
     public DebugSphereCommand() {
-        super("debugSphere", "/debugSphere", "Toggles debug bounding spheres for planet atmospheres.", true);
+        super("debugSpheres", "/debugSpheres", "Toggles debug bounding spheres for planet atmospheres.", true);
     }
 
     @Override

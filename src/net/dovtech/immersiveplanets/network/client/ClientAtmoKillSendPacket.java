@@ -8,6 +8,7 @@ import api.network.PacketWriteBuffer;
 import api.universe.StarSector;
 import api.universe.StarUniverse;
 import net.dovtech.immersiveplanets.data.AtmosphereEntryDamager;
+import org.newdawn.slick.Game;
 import org.schema.common.util.linAlg.Vector3i;
 import org.schema.game.common.data.player.PlayerState;
 import java.io.IOException;
@@ -27,14 +28,14 @@ public class ClientAtmoKillSendPacket extends Packet {
 
     @Override
     public void readPacketData(PacketReadBuffer packetReadBuffer) throws IOException {
-        if(GameCommon.isDedicatedServer()) {
+        if(GameCommon.isDedicatedServer() || GameCommon.isOnSinglePlayer()) {
             sector = packetReadBuffer.readVector();
         }
     }
 
     @Override
     public void writePacketData(PacketWriteBuffer packetWriteBuffer) throws IOException {
-        if(GameCommon.isClientConnectedToServer()) {
+        if(GameCommon.isClientConnectedToServer() || GameCommon.isOnSinglePlayer()) {
             packetWriteBuffer.writeVector(sector);
         }
     }

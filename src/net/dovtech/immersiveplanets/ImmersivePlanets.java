@@ -18,12 +18,10 @@ import net.dovtech.immersiveplanets.graphics.shape.BoundingSphere;
 import net.dovtech.immersiveplanets.network.client.ClientAtmoKillSendPacket;
 import org.lwjgl.opengl.GL11;
 import org.schema.game.client.data.GameClientState;
-import org.schema.game.common.data.world.SectorInformation;
 import org.schema.schine.graphicsengine.core.Controller;
-import org.schema.schine.graphicsengine.core.GlUtil;
 import org.schema.schine.graphicsengine.core.settings.EngineSettings;
 import org.schema.schine.graphicsengine.forms.Mesh;
-import org.schema.schine.graphicsengine.shader.ShaderLibrary;
+import org.schema.schine.graphicsengine.texture.Material;
 import org.schema.schine.graphicsengine.texture.Texture;
 import org.schema.schine.graphicsengine.texture.TextureLoader;
 import javax.imageio.ImageIO;
@@ -83,7 +81,7 @@ public class ImmersivePlanets extends StarMod {
         inst = this;
         setModName("ImmersivePlanets");
         setModAuthor("Dovtech");
-        setModVersion("0.3.4");
+        setModVersion("0.3.5");
         setModDescription("Adds larger and more immersive planets with their own atmospheres and features.");
 
         if (GameCommon.isOnSinglePlayer() || GameCommon.isDedicatedServer()) initConfig();
@@ -93,10 +91,12 @@ public class ImmersivePlanets extends StarMod {
     public void onEnable() {
         super.onEnable();
 
-        if (GameCommon.isClientConnectedToServer() || GameCommon.isOnSinglePlayer()) clientViewDistance = (int) EngineSettings.G_MAX_SEGMENTSDRAWN.getCurrentState();
+        if (GameCommon.isClientConnectedToServer() || GameCommon.isOnSinglePlayer())
+            clientViewDistance = (int) EngineSettings.G_MAX_SEGMENTSDRAWN.getCurrentState();
 
         registerListeners();
         registerCommands();
+        registerPackets();
 
         DebugFile.log("Enabled", this);
     }
@@ -107,11 +107,21 @@ public class ImmersivePlanets extends StarMod {
     }
 
     public InputStream getResource(String path) {
-        return ImmersivePlanets.class.getResourceAsStream("resources/" + path);
+        try {
+            return ImmersivePlanets.class.getResourceAsStream("resources/" + path);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            DebugFile.err("Could not fetch file " + path + "!");
+            return null;
+        }
+    }
+
+    private void registerPackets() {
+        PacketUtil.registerPacket(ClientAtmoKillSendPacket.class);
     }
 
     private void registerCommands() {
-        if(debugMode) {
+        if (debugMode) {
             StarLoader.registerCommand(new PlanetTextureChangeCommand());
             StarLoader.registerCommand(new DebugSphereCommand());
         }
@@ -129,16 +139,17 @@ public class ImmersivePlanets extends StarMod {
         StarLoader.registerListener(PlanetDrawEvent.class, new Listener<PlanetDrawEvent>() {
             @Override
             public void onEvent(PlanetDrawEvent event) {
-                if(clientState == null || player == null) {
+                if (clientState == null || player == null) {
                     clientState = GameClient.getClientState();
                     player = new StarPlayer(GameClient.getClientPlayerState());
                 }
                 try {
-                    if(player.getSector().getInternalSector().getSectorType().equals(SectorInformation.SectorType.PLANET)) {
+                    if(event.getSphere() != null) {
                         if (outerBoundingSphere == null || innerBoundingSphere == null || clouds == null || planet == null) {
-                            float skyRadius = event.getDodecahedron().radius * skyOffset;
-                            Vector3f skyScale = event.getSphere().getScale();
-                            skyScale.scale(skyOffset);
+                            float skyRadius = event.getPlanetInfo().getRadius() * skyOffset;
+                            if (skyRadius <= 0) skyRadius = 300; //Todo: Detect world mean planet size
+                            //Vector3f skyScale = new Vector3f(1.15f, 1.15f, 1.15f);
+                            //ShaderLibrary.loadShaders();
 
                             outerBoundingSphere = new BoundingSphere(skyRadius, event.getSphere().getPos());
                             outerBoundingSphere.onInit();
@@ -149,19 +160,38 @@ public class ImmersivePlanets extends StarMod {
                             //clouds = (Mesh) Controller.getResLoader().getMesh("GeoSphere").getChilds().get(0);
                             cloudsImage = ImageIO.read(getResource("texture/planet/clouds.png"));
                             cloudsTexture = TextureLoader.getTexture(cloudsImage, "cloudsTexture", GL11.GL_TEXTURE_2D, GL11.GL_RGBA, GL11.GL_LINEAR, GL11.GL_LINEAR, true, false);
+                            //GlUtil.glPushMatrix();
+                            //GL11.glScalef(skyScale.x, skyScale.y, skyScale.z);
+                            //ShaderLibrary.atmosphereShader.load();
+                            //GlUtil.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+                            //GlUtil.glEnable(GL11.GL_TEXTURE_2D);
+                            //GL11.glTexParameteri(GL12.GL_TEXTURE_3D, GL12.GL_TEXTURE_WRAP_R, GL11.GL_REPEAT);
+                            //GlUtil.glActiveTexture(GL13.GL_TEXTURE1);
+                            //if(event.getSector().equals(player.getSector().getCoordinates())) GlUtil.glEnable(GL11.GL_BLEND);
+                            /*
                             GlUtil.glPushMatrix();
-                            GlUtil.translateModelview(event.getSphere().getPos());
-                            GL11.glScalef(skyScale.x, skyScale.y, skyScale.z);
-                            if(debugMode) DebugFile.log("[DEBUG] Scaled cloud mesh to " + skyScale.toString());
-                            ShaderLibrary.skyShader.load();
-                            GlUtil.glEnable(GL11.GL_TEXTURE_2D);
-                            clouds = Controller.getResLoader().getMesh("Sky");
+                            GlUtil.scaleModelview(1.15f, 1.15f, 1.15f);
+                            clouds = Controller.getResLoader().getMesh("Sphere");
+                             */
+                            clouds = (Mesh) Controller.getResLoader().getMesh("Sphere").getChilds().iterator().next();
+                            Vector3f cloudScale = event.getSphere().getScale();
+                            cloudScale.scale(skyOffset);
+                            clouds.setScale(cloudScale);
+                            if (debugMode) DebugFile.log("[DEBUG] Scaled cloud mesh to " + cloudScale.toString());
+
+                            clouds.setPos(event.getSphere().getPos());
+                            clouds.setMaterial(new Material());
                             clouds.getMaterial().setTexture(cloudsTexture);
-                            ShaderLibrary.skyShader.unload();
-                            GlUtil.glPopMatrix();
+                            //clouds.loadVBO(true);
+                            //clouds.getMaterial().getTexture().bindOnShader(GL13.GL_TEXTURE1, 1, "cloudsTexture", ShaderLibrary.atmosphereShader);
+                            //GlUtil.glBindTexture(GL11.GL_TEXTURE_2D, clouds.getMaterial().getTexture().getTextureId());
+                            //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+                            //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+                            //ShaderLibrary.atmosphereShader.unload();
+                            //GlUtil.glPopMatrix();
 
                             String texturePath;
-                            switch(event.getPlanetType()) {
+                            switch (event.getPlanetType()) {
                                 case ICE:
                                     texturePath = "texture/planet/ice-planet.png";
                                     break;
@@ -174,21 +204,42 @@ public class ImmersivePlanets extends StarMod {
                             }
                             planetImage = ImageIO.read(getResource(texturePath));
                             planetTexture = TextureLoader.getTexture(planetImage, event.getPlanetType().name().toLowerCase() + "-texture", GL11.GL_TEXTURE_2D, GL11.GL_RGBA, GL11.GL_LINEAR, GL11.GL_LINEAR, true, false);
-                            GlUtil.glPushMatrix();
-                            GlUtil.translateModelview(event.getSphere().getPos());
-                            Vector3f planetScale = new Vector3f(skyScale.x * 0.95f, skyScale.y * 0.95f, skyScale.z * 0.95f);
-                            GL11.glScalef(planetScale.x, planetScale.y, planetScale.z);
-                            if(debugMode) DebugFile.log("[DEBUG] Scaled planet mesh to " + planetScale.toString());
-                            ShaderLibrary.planetShader.load();
-                            GlUtil.glEnable(GL11.GL_TEXTURE_2D);
-                            planet = Controller.getResLoader().getMesh("Sphere");
+                            //GlUtil.glPushMatrix();
+                            //cloudScale.scale(0.95f);
+                            //GL11.glScalef(planetScale.x, planetScale.y, planetScale.z);
+                            //ShaderLibrary.planetShader.load();
+                            //GlUtil.glEnableClientState(GL11.GL_VERTEX_ARRAY);
+                            //GlUtil.glEnable(GL11.GL_TEXTURE_2D);
+                            //GlUtil.glActiveTexture(GL13.GL_TEXTURE2);
+                            //if(event.getSector().equals(player.getSector().getCoordinates())) GlUtil.glEnable(GL11.GL_BLEND);
+                            planet = event.getSphere();
+                            //planet.setScale(cloudScale);
+                            //if (debugMode) DebugFile.log("[DEBUG] Scaled planet mesh to " + cloudScale.toString());
+                            planet.setPos(event.getSphere().getPos());
+                            //planet.setMaterial(new Material());
                             planet.getMaterial().setTexture(planetTexture);
-                            ShaderLibrary.planetShader.unload();
-                            GlUtil.glPopMatrix();
+                            //planet.loadVBO(true);
+                            //GlUtil.glBindTexture(GL11.GL_TEXTURE_2D, planet.getMaterial().getTexture().getTextureId());
+                            //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
+                            //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
+                        /*
+                        GlUtil.glEnable(GL11.GL_CULL_FACE);
+                        GL11.glCullFace(GL11.GL_BACK);
+                        GlUtil.glEnable(GL11.GL_DEPTH_TEST);
+                        GlUtil.glDisable(GL11.GL_BLEND);
+                        GlUtil.glEnable(GL11.GL_CULL_FACE);
+                        GlUtil.glPopMatrix();
+                        GL11.glDepthRange(0.0, 1.0);
+                        GlUtil.glDepthMask(true);
+                        //planet.unloadVBO(true);
+                        ShaderLibrary.planetShader.unload();
+                        GlUtil.glPopMatrix();
+                        */
+                        //GlUtil.glActiveTexture(GL13.GL_TEXTURE3);
                         }
 
-                        if (outerBoundingSphere != null && innerBoundingSphere != null && clouds != null) {
-                            if (debugMode && drawDebugSpheres)  {
+                        if (outerBoundingSphere != null && innerBoundingSphere != null && clouds != null && planet != null) {
+                            if (debugMode && drawDebugSpheres) {
                                 outerBoundingSphere.draw();
                                 innerBoundingSphere.draw();
                             } else {
@@ -197,21 +248,25 @@ public class ImmersivePlanets extends StarMod {
                             }
 
                             clouds.draw();
+                            //clouds.drawVBO();
+                            planet.draw();
+                            //planet.drawVBO();
 
                             Vector3f clientPos = Controller.getCamera().getPos();
-                            if (outerBoundingSphere.isPositionInRadius(clientPos) && !innerBoundingSphere.isPositionInRadius(clientPos)) {
-                                if (debugMode) DebugFile.log("[DEBUG] Client is within atmosphere of planet at " + event.getSector().toString());
+                            if (outerBoundingSphere.isPositionInRadius(clientPos) && !innerBoundingSphere.isPositionInRadius(clientPos) && player.getSector().getCoordinates().equals(event.getSector())) {
+                                if (debugMode)
+                                    DebugFile.log("[DEBUG] Client is within atmosphere of planet at " + event.getSector().toString());
 
-                                if(clientState.isInAnyBuildMode() && !player.getPlayerState().isGodMode()) {
+                                if ((clientState.isInAnyStructureBuildMode() || clientState.isInCharacterBuildMode()) && !player.getPlayerState().isGodMode()) {
                                     Vector3f clientBuildModePos = player.getPlayerState().getBuildModePosition().getWorldTransformOnClient().origin;
-                                    if(outerBoundingSphere.isPositionInRadius(clientBuildModePos) && !innerBoundingSphere.isPositionInRadius(clientBuildModePos)) {
+                                    if (outerBoundingSphere.isPositionInRadius(clientBuildModePos) && !innerBoundingSphere.isPositionInRadius(clientBuildModePos) && player.getSector().getCoordinates().equals(event.getSector())) {
                                         Vector3f pos = player.getPlayerState().getBuildModePosition().getWorldTransformOnClient().origin;
                                         String oldPosString = pos.toString();
                                         float pushBack = outerBoundingSphere.getDistanceToCenter(pos);
                                         pos.sub(new Vector3f(pushBack, pushBack, pushBack));
                                         String newPosString = pos.toString();
                                         player.getPlayerState().getBuildModePosition().getWorldTransformOnClient().origin.set(pos);
-                                        if(debugMode) {
+                                        if (debugMode) {
                                             DebugFile.log("[DEBUG] Pushed client build mode camera out of debug sphere");
                                             DebugFile.log("OldPos: " + oldPosString);
                                             DebugFile.log("NewPos : " + newPosString);
@@ -224,14 +279,15 @@ public class ImmersivePlanets extends StarMod {
                                     velocity.scale(0.35f);
                                     player.getCurrentEntity().setVelocity(velocity);
                                 } else {
-                                    if(GameCommon.isClientConnectedToServer() || GameCommon.isOnSinglePlayer()) {
+                                    if (GameCommon.isClientConnectedToServer() || GameCommon.isOnSinglePlayer()) {
                                         PacketUtil.sendPacketToServer(new ClientAtmoKillSendPacket(player.getSector().getCoordinates()));
                                     }
                                 }
-                                if(reduceDrawOnPlanets) {
+                                if (reduceDrawOnPlanets) {
                                     if (!EngineSettings.G_MAX_SEGMENTSDRAWN.getCurrentState().equals(planetChunkViewDistance)) {
                                         EngineSettings.G_MAX_SEGMENTSDRAWN.setCurrentState(planetChunkViewDistance);
-                                        if (debugMode) DebugFile.log("[DEBUG] Set view distance to " + planetChunkViewDistance);
+                                        if (debugMode)
+                                            DebugFile.log("[DEBUG] Set view distance to " + planetChunkViewDistance);
                                     }
                                 }
                             } else if (outerBoundingSphere.isPositionInRadius(clientPos) || innerBoundingSphere.isPositionInRadius(clientPos)) {
@@ -245,6 +301,10 @@ public class ImmersivePlanets extends StarMod {
                                 }
                             }
                         }
+                    } else {
+                        if(planet != null) planet.cleanUp();
+                        if(clouds != null) clouds.cleanUp();
+
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
