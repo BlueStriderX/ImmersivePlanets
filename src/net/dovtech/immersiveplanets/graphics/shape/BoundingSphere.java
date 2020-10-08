@@ -3,6 +3,7 @@ package net.dovtech.immersiveplanets.graphics.shape;
 import net.dovtech.immersiveplanets.ImmersivePlanets;
 import org.lwjgl.opengl.GL11;
 import org.schema.common.util.linAlg.Vector3fTools;
+import org.schema.common.util.linAlg.Vector3i;
 import org.schema.game.common.data.world.Segment;
 import org.schema.schine.graphicsengine.core.Controller;
 import org.schema.schine.graphicsengine.core.Drawable;
@@ -17,17 +18,20 @@ public class BoundingSphere implements Drawable {
     private Vector3f position;
     private Vector4f color;
     private boolean debugDraw;
+    private boolean init;
 
     public BoundingSphere(float radius) {
         this.radius = radius;
         this.position = new Vector3f();
         this.debugDraw = false;
+        this.init = false;
     }
 
     public BoundingSphere(float radius, Vector3f position) {
         this.radius = radius;
         this.position = position;
         this.debugDraw = false;
+        this.init = false;
     }
 
     public BoundingSphere(BoundingBox boundingBox) {
@@ -35,6 +39,7 @@ public class BoundingSphere implements Drawable {
         this.radius = Math.max(boundingBox.max.length(), boundingBox.min.length());
         this.position = boundingBox.getCenter(new Vector3f());
         this.debugDraw = false;
+        this.init = false;
     }
 
     public float getRadius() {
@@ -68,6 +73,7 @@ public class BoundingSphere implements Drawable {
 
     @Override
     public void draw() {
+        if(!init) onInit();
         debugDraw = true;
         GlUtil.glColor4f(color);
         GlUtil.translateModelview(position);
@@ -97,6 +103,18 @@ public class BoundingSphere implements Drawable {
         float halfY = position.y - Segment.HALF_DIM;
         float halfZ = position.z - Segment.HALF_DIM;
         return Math.abs(Vector3fTools.distance(pos.x, pos.y, pos.z, halfX, halfY, halfZ));
+    }
+
+    public boolean isPositionInRadius(Vector3i pos) {
+        return getDistanceToCenter(pos) <= radius;
+    }
+
+    public float getDistanceToCenter(Vector3i pos) {
+        float halfX = position.x - Segment.HALF_DIM;
+        float halfY = position.y - Segment.HALF_DIM;
+        float halfZ = position.z - Segment.HALF_DIM;
+        Vector3i newPos = new Vector3i(halfX, halfY, halfZ);
+        return Math.abs(Vector3i.getDisatance(newPos, pos));
     }
 
     @Override

@@ -53,7 +53,7 @@ public class AtmosphereEntryDamager implements Damager {
 
     @Override
     public String getName() {
-        return "Atmospheric Reentry Damage";
+        return "Atmospheric Heat Damage";
     }
 
     @Override

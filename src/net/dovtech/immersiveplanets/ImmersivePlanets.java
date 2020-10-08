@@ -7,15 +7,18 @@ import api.config.BlockConfig;
 import api.entity.StarPlayer;
 import api.listener.Listener;
 import api.listener.events.draw.PlanetDrawEvent;
+import api.listener.events.draw.RegisterWorldDrawersEvent;
 import api.listener.events.draw.SegmentDrawEvent;
 import api.mod.StarLoader;
 import api.mod.StarMod;
 import api.mod.config.FileConfiguration;
 import api.network.packets.PacketUtil;
+import net.dovtech.immersiveplanets.commands.DebugCreateGasGiantCommand;
 import net.dovtech.immersiveplanets.commands.DebugSphereCommand;
 import net.dovtech.immersiveplanets.commands.PlanetTextureChangeCommand;
 import net.dovtech.immersiveplanets.graphics.shape.BoundingSphere;
 import net.dovtech.immersiveplanets.network.client.ClientAtmoKillSendPacket;
+import net.dovtech.immersiveplanets.planet.GasGiant;
 import org.lwjgl.opengl.GL11;
 import org.schema.game.client.data.GameClientState;
 import org.schema.schine.graphicsengine.core.Controller;
@@ -47,6 +50,7 @@ public class ImmersivePlanets extends StarMod {
     //Mesh
     public Mesh clouds;
     public Mesh planet;
+    public GasGiant gasGiant;
     private BoundingSphere outerBoundingSphere;
     private BoundingSphere innerBoundingSphere;
 
@@ -81,7 +85,7 @@ public class ImmersivePlanets extends StarMod {
         inst = this;
         setModName("ImmersivePlanets");
         setModAuthor("Dovtech");
-        setModVersion("0.4.1");
+        setModVersion("0.4.7");
         setModDescription("Adds larger and more immersive planets with their own atmospheres and features.");
 
         if (GameCommon.isOnSinglePlayer() || GameCommon.isDedicatedServer()) initConfig();
@@ -124,10 +128,19 @@ public class ImmersivePlanets extends StarMod {
         if (debugMode) {
             StarLoader.registerCommand(new PlanetTextureChangeCommand());
             StarLoader.registerCommand(new DebugSphereCommand());
+            StarLoader.registerCommand(new DebugCreateGasGiantCommand());
         }
     }
 
     private void registerListeners() {
+
+        StarLoader.registerListener(RegisterWorldDrawersEvent.class, new Listener<RegisterWorldDrawersEvent>() {
+            @Override
+            public void onEvent(RegisterWorldDrawersEvent event) {
+                gasGiant = new GasGiant();
+                event.getModDrawables().add(gasGiant);
+            }
+        });
 
         StarLoader.registerListener(SegmentDrawEvent.class, new Listener<SegmentDrawEvent>() {
             @Override
@@ -150,6 +163,10 @@ public class ImmersivePlanets extends StarMod {
                         Vector3f skyScale = event.getSphere().getScale();
                         //skyScale.scale(skyOffset);
                         //ShaderLibrary.loadShaders();
+
+                        event.getPlanetInfo().setHasCloud(true);
+                        event.getPlanetInfo().setCloudHeight(skyOffset * 1.1f);
+                        event.getPlanetInfo().setAtmosphereDensity(3.5f);
 
                         outerBoundingSphere = new BoundingSphere(skyRadius, event.getSphere().getPos());
                         outerBoundingSphere.onInit();
@@ -276,9 +293,9 @@ public class ImmersivePlanets extends StarMod {
 
                             Vector3f clientPos = Controller.getCamera().getPos();
                             if (outerBoundingSphere.isPositionInRadius(clientPos) && !innerBoundingSphere.isPositionInRadius(clientPos) && player.getSector().getCoordinates().equals(event.getSector())) {
-                                if (debugMode)
-                                    DebugFile.log("[DEBUG] Client is within atmosphere of planet at " + event.getSector().toString());
+                                if (debugMode) DebugFile.log("[DEBUG] Client is within atmosphere of planet at " + event.getSector().toString());
 
+                                /*
                                 if ((clientState.isInAnyStructureBuildMode() || clientState.isInCharacterBuildMode()) && !player.getPlayerState().isGodMode()) {
                                     Vector3f clientBuildModePos = player.getPlayerState().getBuildModePosition().getWorldTransformOnClient().origin;
                                     if (outerBoundingSphere.isPositionInRadius(clientBuildModePos) && !innerBoundingSphere.isPositionInRadius(clientBuildModePos) && player.getSector().getCoordinates().equals(event.getSector())) {
@@ -295,6 +312,7 @@ public class ImmersivePlanets extends StarMod {
                                         }
                                     }
                                 }
+                                 */
 
                                 if (player.getCurrentEntity() != null || player.getPlayerState().isSitting() || player.getPlayerState().isGodMode()) {
                                     Vector3f velocity = player.getCurrentEntity().getVelocity();
