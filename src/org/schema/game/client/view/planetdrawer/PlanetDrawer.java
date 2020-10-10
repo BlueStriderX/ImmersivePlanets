@@ -71,14 +71,6 @@ public class PlanetDrawer implements Drawable {
     private static PlanetDrawer inst;
     public Vector3i sector;
     public BodyType bodyType;
-
-    private float gasGiantGenerationChance;
-    private int gasGiantMaxRadius;
-    private int gasGiantMinRadius;
-    private int gasGiantMaxRings;
-    private float gasGiantRingGenerationChance;
-    private int gasGiantMaxMoons;
-    private float gasGiantMoonGenerationChance;
     //
 
     private float atmosphereSize = 0.0F;
@@ -94,6 +86,7 @@ public class PlanetDrawer implements Drawable {
 
         //Modified
         inst = this;
+        /*
         gasGiantGenerationChance = ImmersivePlanets.getInstance().gasGiantGenerationChance;
         gasGiantMaxRadius = ImmersivePlanets.getInstance().gasGiantMaxRadius;
         gasGiantMinRadius = ImmersivePlanets.getInstance().gasGiantMinRadius;
@@ -101,6 +94,7 @@ public class PlanetDrawer implements Drawable {
         gasGiantRingGenerationChance = ImmersivePlanets.getInstance().gasGiantRingGenerationChance;
         gasGiantMaxMoons = ImmersivePlanets.getInstance().gasGiantMaxMoons;
         gasGiantMoonGenerationChance = ImmersivePlanets.getInstance().gasGiantMoonGenerationChance;
+         */
         //
     }
 
@@ -390,13 +384,13 @@ public class PlanetDrawer implements Drawable {
         if(sector != null && bodyType != null && bodyType.name().toLowerCase().contains("gas")) {
             Random random = new Random();
 
-            int radius = random.nextInt(gasGiantMaxRadius = gasGiantMinRadius) + gasGiantMinRadius;
+            int radius = random.nextInt(ImmersivePlanets.getInstance().gasGiantMaxRadius = ImmersivePlanets.getInstance().gasGiantMinRadius) + ImmersivePlanets.getInstance().gasGiantMinRadius;
 
             int ringCount = 0;
             int ringTurns = 0;
-            int ringsRandom = random.nextInt(gasGiantMaxRings);
-            while (ringTurns <= gasGiantMaxRings) {
-                if (gasGiantRingGenerationChance <= (float) ringsRandom / 100) {
+            int ringsRandom = random.nextInt(ImmersivePlanets.getInstance().gasGiantMaxRings);
+            while (ringTurns <= ImmersivePlanets.getInstance().gasGiantMaxRings) {
+                if (ImmersivePlanets.getInstance().gasGiantRingGenerationChance <= (float) ringsRandom / 100) {
                     ringCount++;
                 }
                 ringTurns++;
@@ -404,9 +398,9 @@ public class PlanetDrawer implements Drawable {
 
             int moonCount = 0;
             int moonTurns = 0;
-            int moonRandom = random.nextInt(gasGiantMaxMoons);
-            while (moonTurns <= gasGiantMaxMoons) {
-                if (gasGiantMoonGenerationChance <= (float) moonRandom / 100) {
+            int moonRandom = random.nextInt(ImmersivePlanets.getInstance().gasGiantMaxMoons);
+            while (moonTurns <= ImmersivePlanets.getInstance().gasGiantMaxMoons) {
+                if (ImmersivePlanets.getInstance().gasGiantMoonGenerationChance <= (float) moonRandom / 100) {
                     moonCount++;
                 }
                 moonTurns++;
