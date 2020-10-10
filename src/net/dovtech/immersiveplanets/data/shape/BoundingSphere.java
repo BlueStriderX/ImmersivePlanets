@@ -1,4 +1,4 @@
-package net.dovtech.immersiveplanets.graphics.shape;
+package net.dovtech.immersiveplanets.data.shape;
 
 import net.dovtech.immersiveplanets.ImmersivePlanets;
 import org.lwjgl.opengl.GL11;
@@ -17,20 +17,17 @@ public class BoundingSphere implements Drawable {
     private float radius;
     private Vector3f position;
     private Vector4f color;
-    private boolean debugDraw;
     private boolean init;
 
     public BoundingSphere(float radius) {
         this.radius = radius;
         this.position = new Vector3f();
-        this.debugDraw = false;
         this.init = false;
     }
 
     public BoundingSphere(float radius, Vector3f position) {
         this.radius = radius;
         this.position = position;
-        this.debugDraw = false;
         this.init = false;
     }
 
@@ -38,7 +35,6 @@ public class BoundingSphere implements Drawable {
         this.radius = 0;
         this.radius = Math.max(boundingBox.max.length(), boundingBox.min.length());
         this.position = boundingBox.getCenter(new Vector3f());
-        this.debugDraw = false;
         this.init = false;
     }
 
@@ -68,30 +64,31 @@ public class BoundingSphere implements Drawable {
 
     @Override
     public void cleanUp() {
-        debugDraw = false;
+        ImmersivePlanets.getInstance().drawDebugSpheres = false;
     }
 
     @Override
     public void draw() {
         if(!init) onInit();
-        debugDraw = true;
-        GlUtil.glColor4f(color);
-        GlUtil.translateModelview(position);
-        GlUtil.glDepthMask(false);
-        if(isPositionInRadius(Controller.getCamera().getPos())) {
-            GL11.glCullFace(GL11.GL_FRONT);
-        } else {
+        if(ImmersivePlanets.getInstance().drawDebugSpheres) {
+            GlUtil.glColor4f(color);
+            GlUtil.translateModelview(position);
+            GlUtil.glDepthMask(false);
+            if (isPositionInRadius(Controller.getCamera().getPos())) {
+                GL11.glCullFace(GL11.GL_FRONT);
+            } else {
+                GL11.glCullFace(GL11.GL_BACK);
+            }
+
+            GlUtil.drawSphere(radius, 20);
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+
+            GlUtil.drawSphere(radius, 20);
+            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+
+            GlUtil.glDepthMask(true);
             GL11.glCullFace(GL11.GL_BACK);
         }
-
-        GlUtil.drawSphere(radius, 20);
-        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
-
-        GlUtil.drawSphere(radius, 20);
-        GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-
-        GlUtil.glDepthMask(true);
-        GL11.glCullFace(GL11.GL_BACK);
     }
 
     public boolean isPositionInRadius(Vector3f pos) {
@@ -119,11 +116,12 @@ public class BoundingSphere implements Drawable {
 
     @Override
     public boolean isInvisible() {
-        return !ImmersivePlanets.getInstance().debugMode && !debugDraw;
+        return !ImmersivePlanets.getInstance().debugMode || !ImmersivePlanets.getInstance().drawDebugSpheres;
     }
 
     @Override
     public void onInit() {
         if(color == null) color = new Vector4f(150,150,150,0.1f);
+        init = true;
     }
 }

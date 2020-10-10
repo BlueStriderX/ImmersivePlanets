@@ -1,34 +1,37 @@
 package net.dovtech.immersiveplanets.commands;
 
 import api.DebugFile;
+import api.universe.StarUniverse;
+import api.utils.game.PlayerUtils;
 import api.utils.game.chat.ChatCommand;
 import net.dovtech.immersiveplanets.ImmersivePlanets;
+import net.dovtech.immersiveplanets.planet.BodyType;
+import org.schema.game.client.view.planetdrawer.PlanetDrawer;
 import org.schema.game.common.data.player.PlayerState;
-import javax.vecmath.Vector4f;
+import org.schema.game.common.data.world.SectorInformation;
 
 public class DebugCreateGasGiantCommand extends ChatCommand {
 
     public DebugCreateGasGiantCommand() {
-        super("spawnGasGiant", "/spawnGasGiant <textureID> <radius> <ringCount> <moonCount>", "Creates a Gas Giant in the sector next to you.", true);
+        super("spawn_gas_giant", "/spawn_gas_giant", "Creates a random Gas Giant from the planet in your sector.", true);
     }
 
     @Override
     public boolean onCommand(PlayerState sender, String[] args) {
-        if(args.length == 4) {
-            try {
-                String textureID = args[0];
-                int radius = Integer.parseInt(args[1]);
-                int ringCount = Integer.parseInt(args[2]);
-                int moonCount = Integer.parseInt(args[3]);
-                Vector4f fogColor = new Vector4f(204, 140, 88, 65);
-                ImmersivePlanets.getInstance().gasGiant.create(textureID, radius, ringCount, moonCount, fogColor, sender.getCurrentSector());
-                if(ImmersivePlanets.getInstance().debugMode) DebugFile.log("[DEBUG] Spawned Gas Giant at " + sender.getCurrentSector().toString());
-                return true;
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
+        try {
+            if (StarUniverse.getUniverse().getSector(sender.getCurrentSector()).getInternalSector().getSectorType().equals(SectorInformation.SectorType.PLANET)) {
+                PlanetDrawer.getInstance().sector = sender.getCurrentSector();
+                PlanetDrawer.getInstance().bodyType = BodyType.GAS_GIANT_ORANGE;
+                PlanetDrawer.getInstance().onInit();
+                PlanetDrawer.getInstance().drawFromPlanet = true;
+                PlanetDrawer.getInstance().drawGasGiant();
+                if (ImmersivePlanets.getInstance().debugMode) DebugFile.log("[DEBUG] Spawned Gas Giant at " + sender.getCurrentSector().toString());
+            } else {
+                PlayerUtils.sendMessage(sender, "[ERROR] You must be in a planet sector to do this!");
             }
-        } else {
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
