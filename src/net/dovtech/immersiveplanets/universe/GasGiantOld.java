@@ -1,4 +1,4 @@
-package net.dovtech.immersiveplanets.planet;
+package net.dovtech.immersiveplanets.universe;
 
 import api.common.GameClient;
 import api.common.GameCommon;
@@ -12,9 +12,7 @@ import org.schema.schine.graphicsengine.core.Controller;
 import org.schema.schine.graphicsengine.core.GlUtil;
 import org.schema.schine.graphicsengine.forms.Mesh;
 import org.schema.schine.graphicsengine.texture.Texture;
-import org.schema.schine.graphicsengine.texture.TextureLoader;
 
-import javax.imageio.ImageIO;
 import javax.vecmath.Color4f;
 import javax.vecmath.Vector3f;
 import java.io.IOException;
@@ -45,7 +43,7 @@ public class GasGiantOld extends CelestialBody {
         this.textureID = textureID;
         this.sector = sector;
         this.position = new Vector3f(0, 0, 0);
-        //this.texture = TextureLoader.getTexture(ImageIO.read(ImmersivePlanets.getInstance().getResource("texture/planet/gas-giant-" + textureID + ".png")), "gas-giant-" + textureID + "-texture", GL11.GL_TEXTURE_2D, GL11.GL_RGBA, GL11.GL_LINEAR, GL11.GL_LINEAR, true, false);
+        //this.texture = TextureLoader.getTexture(ImageIO.read(ImmersivePlanets.getInstance().getResource("texture/universe/gas-giant-" + textureID + ".png")), "gas-giant-" + textureID + "-texture", GL11.GL_TEXTURE_2D, GL11.GL_RGBA, GL11.GL_LINEAR, GL11.GL_LINEAR, true, false);
         this.outerAtmosphere = new BoundingSphere(radius);
         this.innerAtmosphere = new BoundingSphere(radius * 0.72f);
         //this.killSphere = new BoundingSphere(radius * 0.65f);
@@ -185,7 +183,7 @@ public class GasGiantOld extends CelestialBody {
         GlUtil.glEnable(GL11.GL_TEXTURE_2D);
         cloudSphere.setPos(0, 0, 0);
         cloudSphere.setScale(scale, scale, scale);
-        //cloudSphere.getMaterial().setTextureFile(ImmersivePlanets.class.getResource("resources/texture/planet/gas-giant-" + textureID + ".png").getPath());
+        //cloudSphere.getMaterial().setTextureFile(ImmersivePlanets.class.getResource("resources/texture/universe/gas-giant-" + textureID + ".png").getPath());
         cloudSphere.getMaterial().setTexture(texture);
         GlUtil.glBindTexture(GL11.GL_TEXTURE_2D, texture.getTextureId());
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);

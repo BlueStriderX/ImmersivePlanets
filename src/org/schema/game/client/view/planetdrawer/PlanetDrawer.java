@@ -3,7 +3,6 @@ PlanetDrawer.java (Modified)
  */
 package org.schema.game.client.view.planetdrawer;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Random;
 
@@ -12,12 +11,9 @@ import javax.vecmath.Matrix3f;
 import javax.vecmath.Vector3f;
 import javax.vecmath.Vector4f;
 
-import javafx.geometry.Bounds;
 import net.dovtech.immersiveplanets.DataUtils;
 import net.dovtech.immersiveplanets.ImmersivePlanets;
-import net.dovtech.immersiveplanets.data.shape.BoundingSphere;
-import net.dovtech.immersiveplanets.planet.BodyType;
-import net.dovtech.immersiveplanets.planet.GasGiant;
+import net.dovtech.immersiveplanets.universe.GasGiant;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.schema.common.FastMath;
@@ -37,8 +33,6 @@ import org.schema.schine.graphicsengine.forms.Mesh;
 import org.schema.schine.graphicsengine.shader.Shader;
 import org.schema.schine.graphicsengine.shader.ShaderLibrary;
 import org.schema.schine.graphicsengine.shader.Shaderable;
-import org.schema.schine.graphicsengine.texture.Material;
-import org.schema.schine.graphicsengine.texture.Texture;
 import org.schema.schine.network.objects.Sendable;
 
 import com.bulletphysics.linearmath.Transform;
@@ -67,12 +61,6 @@ public class PlanetDrawer implements Drawable {
     private Transform transR = new Transform();
     private Mesh sphere;
 
-    //Modified
-    private static PlanetDrawer inst;
-    public Vector3i sector;
-    public BodyType bodyType;
-    //
-
     private float atmosphereSize = 0.0F;
     public PlanetDrawer(GameClientState state) {
         trans.setIdentity();
@@ -83,19 +71,6 @@ public class PlanetDrawer implements Drawable {
             infoBase[i].getAtmosphereColor().set(PlanetType.values()[i].atmosphere);
         }
         new PlanetInformations();
-
-        //Modified
-        inst = this;
-        /*
-        gasGiantGenerationChance = ImmersivePlanets.getInstance().gasGiantGenerationChance;
-        gasGiantMaxRadius = ImmersivePlanets.getInstance().gasGiantMaxRadius;
-        gasGiantMinRadius = ImmersivePlanets.getInstance().gasGiantMinRadius;
-        gasGiantMaxRings = ImmersivePlanets.getInstance().gasGiantMaxRings;
-        gasGiantRingGenerationChance = ImmersivePlanets.getInstance().gasGiantRingGenerationChance;
-        gasGiantMaxMoons = ImmersivePlanets.getInstance().gasGiantMaxMoons;
-        gasGiantMoonGenerationChance = ImmersivePlanets.getInstance().gasGiantMoonGenerationChance;
-         */
-        //
     }
 
     @Override
@@ -123,13 +98,13 @@ public class PlanetDrawer implements Drawable {
         GasGiant gasGiant = DataUtils.gasGiants.get(sector);
         if (drawFromPlanet) {
             trans.setIdentity();
-            ; //planet always in the middle. If not put origin here
+            ; //universe always in the middle. If not put origin here
             Matrix3f rot = new Matrix3f();
             rot.rotX((FastMath.PI * 2) * year);
 
             Vector3f bb = new Vector3f();
 
-            //we are in a planet sector
+            //we are in a universe sector
             //-> rotate everything around us
             rot.invert();
             bb.set(trans.origin);
@@ -137,7 +112,7 @@ public class PlanetDrawer implements Drawable {
             TransformTools.rotateAroundPoint(bb, rot, trans, new Transform());
             trans.origin.add(absSectorCenterPos);
 
-            //do planet self rotation
+            //do universe self rotation
             transR.basis.rotX((FastMath.PI * 2) * year);
 
         } else {
@@ -157,7 +132,7 @@ public class PlanetDrawer implements Drawable {
 
         if (relSectorPos.equals(0, 0, 0)) {
 
-            //activate blend if planet in our sector
+            //activate blend if universe in our sector
             GlUtil.glEnable(GL11.GL_BLEND);
             GlUtil.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         } else {
@@ -224,10 +199,6 @@ public class PlanetDrawer implements Drawable {
         gasGiant.drawDebugSpheres();
         //DataUtils.gasGiants.get(sector).draw();
     }
-
-    public static PlanetDrawer getInstance() {
-        return inst;
-    }
     //
 
     public void drawPlanet() {
@@ -246,13 +217,13 @@ public class PlanetDrawer implements Drawable {
         if (drawFromPlanet) {
 
             trans.setIdentity();
-            ; //planet always in the middle. If not put origin here
+            ; //universe always in the middle. If not put origin here
             Matrix3f rot = new Matrix3f();
             rot.rotX((FastMath.PI * 2) * year);
 
             Vector3f bb = new Vector3f();
 
-            //we are in a planet sector
+            //we are in a universe sector
             //-> rotate everything around us
             rot.invert();
             bb.set(trans.origin);
@@ -260,7 +231,7 @@ public class PlanetDrawer implements Drawable {
             TransformTools.rotateAroundPoint(bb, rot, trans, new Transform());
             trans.origin.add(absSectorCenterPos);
 
-            //do planet self rotation
+            //do universe self rotation
             transR.basis.rotX((FastMath.PI * 2) * year);
 
         } else {
@@ -296,7 +267,7 @@ public class PlanetDrawer implements Drawable {
 
         if (relSectorPos.equals(0, 0, 0)) {
 
-            //activate blend if planet in our sector
+            //activate blend if universe in our sector
             GlUtil.glEnable(GL11.GL_BLEND);
             GlUtil.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
         } else {
@@ -381,7 +352,8 @@ public class PlanetDrawer implements Drawable {
     @Override
     public void onInit() {
         //Modified
-        if(sector != null && bodyType != null && bodyType.name().toLowerCase().contains("gas")) {
+        ImmersivePlanets.getInstance().planetDrawer = this;
+        if(!= null && bodyType != null && bodyType.name().toLowerCase().contains("gas")) {
             Random random = new Random();
 
             int radius = random.nextInt(ImmersivePlanets.getInstance().gasGiantMaxRadius = ImmersivePlanets.getInstance().gasGiantMinRadius) + ImmersivePlanets.getInstance().gasGiantMinRadius;

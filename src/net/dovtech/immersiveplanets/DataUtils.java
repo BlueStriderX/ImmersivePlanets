@@ -1,6 +1,6 @@
 package net.dovtech.immersiveplanets;
 
-import net.dovtech.immersiveplanets.planet.GasGiant;
+import net.dovtech.immersiveplanets.universe.GasGiant;
 import org.schema.common.util.linAlg.Vector3i;
 import java.util.HashMap;
 

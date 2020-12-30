@@ -6,14 +6,16 @@ import api.common.GameCommon;
 import api.entity.StarPlayer;
 import api.listener.Listener;
 import api.listener.events.draw.PlanetDrawEvent;
+import api.listener.events.draw.RegisterWorldDrawersEvent;
 import api.mod.StarLoader;
 import api.mod.StarMod;
 import api.mod.config.FileConfiguration;
 import api.network.packets.PacketUtil;
 import net.dovtech.immersiveplanets.commands.DebugCreateGasGiantCommand;
 import net.dovtech.immersiveplanets.commands.DebugSphereCommand;
+import net.dovtech.immersiveplanets.graphics.CelestialBodyDrawer;
 import net.dovtech.immersiveplanets.network.client.ClientAtmoKillSendPacket;
-import net.dovtech.immersiveplanets.planet.BodyType;
+import net.dovtech.immersiveplanets.universe.BodyType;
 import org.schema.game.client.data.GameClientState;
 import org.schema.game.client.view.planetdrawer.PlanetDrawer;
 import org.schema.schine.graphicsengine.core.settings.EngineSettings;
@@ -32,6 +34,7 @@ public class ImmersivePlanets extends StarMod {
     private GameClientState clientState;
     private StarPlayer player;
     public boolean drawDebugSpheres;
+    public CelestialBodyDrawer bodyDrawer;
 
     //Config
     private FileConfiguration config;
@@ -39,7 +42,7 @@ public class ImmersivePlanets extends StarMod {
             "debug-mode: false",
             "sky-offset: 1.3",
             "reduce-draw-on-planets: true",
-            "planet-chunk-view-distance: 250",
+            "universe-chunk-view-distance: 250",
             "gas-giant-generation-chance: 0.15",
             "gas-giant-min-radius: 450",
             "gas-giant-max-radius: 800",
@@ -115,6 +118,15 @@ public class ImmersivePlanets extends StarMod {
     }
 
     private void registerListeners() {
+
+        StarLoader.registerListener(RegisterWorldDrawersEvent.class, new Listener<RegisterWorldDrawersEvent>() {
+            @Override
+            public void onEvent(RegisterWorldDrawersEvent event) {
+                bodyDrawer = new CelestialBodyDrawer(GameClient.getClientState());
+                event.getModDrawables().add(bodyDrawer);
+            }
+        });
+
         StarLoader.registerListener(PlanetDrawEvent.class, new Listener<PlanetDrawEvent>() {
             @Override
             public void onEvent(PlanetDrawEvent event) {
@@ -199,7 +211,7 @@ public class ImmersivePlanets extends StarMod {
         this.debugMode = Boolean.parseBoolean(config.getString("debug-mode"));
         this.skyOffset = (float) config.getDouble("sky-offset");
         this.reduceDrawOnPlanets = Boolean.parseBoolean(config.getString("reduce-draw-on-planets"));
-        this.planetChunkViewDistance = config.getInt("planet-chunk-view-distance");
+        this.planetChunkViewDistance = config.getInt("universe-chunk-view-distance");
         this.gasGiantGenerationChance = (float) config.getDouble("gas-giant-generation-chance");
         this.gasGiantMinRadius = config.getInt("gas-giant-min-radius");
         this.gasGiantMaxRadius = config.getInt("gas-giant-max-radius");

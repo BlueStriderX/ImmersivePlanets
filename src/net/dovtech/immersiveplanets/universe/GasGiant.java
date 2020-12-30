@@ -1,10 +1,10 @@
-package net.dovtech.immersiveplanets.planet;
+package net.dovtech.immersiveplanets.universe;
 
 import api.common.GameClient;
 import net.dovtech.immersiveplanets.ImmersivePlanets;
 import net.dovtech.immersiveplanets.ResourceUtils;
 import net.dovtech.immersiveplanets.data.shape.BoundingSphere;
-import net.dovtech.immersiveplanets.planet.resources.GasResource;
+import net.dovtech.immersiveplanets.universe.resources.GasResource;
 import org.lwjgl.opengl.GL11;
 import org.schema.common.util.linAlg.Vector3i;
 import org.schema.schine.graphicsengine.core.Controller;

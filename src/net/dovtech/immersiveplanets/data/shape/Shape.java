@@ -1,13 +1,23 @@
 package net.dovtech.immersiveplanets.data.shape;
 
+import com.bulletphysics.linearmath.Transform;
 import org.lwjgl.opengl.GL11;
+import org.schema.common.FastMath;
+import org.schema.common.util.linAlg.TransformTools;
+import org.schema.game.client.data.GameStateInterface;
+import org.schema.game.common.data.world.space.PlanetCore;
 import org.schema.schine.graphicsengine.core.Controller;
 import org.schema.schine.graphicsengine.core.Drawable;
 import org.schema.schine.graphicsengine.core.GlUtil;
 import org.schema.schine.graphicsengine.forms.Mesh;
+import org.schema.schine.graphicsengine.shader.ShaderLibrary;
 import org.schema.schine.graphicsengine.texture.Material;
 import org.schema.schine.graphicsengine.texture.Texture;
+import org.schema.schine.network.objects.Sendable;
+
+import javax.vecmath.Matrix3f;
 import javax.vecmath.Vector3f;
+import java.util.Map;
 
 public abstract class Shape implements Drawable {
 

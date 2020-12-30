@@ -1,4 +1,4 @@
-package net.dovtech.immersiveplanets.planet.resources;
+package net.dovtech.immersiveplanets.universe.resources;
 
 public class GasResource {
 
