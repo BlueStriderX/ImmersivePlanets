@@ -1,0 +1,16 @@
+{
+  "name": "ImmersivePlanets",
+  "author": "TheDerpGamer",
+  "description": "Adds larger and more immersive planets with their own atmospheres and features.",
+  "version": "0.7.1",
+  "starmade_version": "0.202.108",
+  "client_mod": false,
+  "server_mod": false,
+  "main_class": "thederpgamer.immersiveplanets.ImmersivePlanets",
+  "smd_resource_id": 99999,
+  "dependencies": [
+    -1
+  ],
+  "core_mod": true,
+  "requires_class_resize": true
+}
