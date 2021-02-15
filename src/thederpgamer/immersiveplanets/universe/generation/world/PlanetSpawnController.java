@@ -7,8 +7,8 @@ import org.schema.game.common.data.world.Segment;
 import org.schema.game.server.controller.RequestDataPlanet;
 import org.schema.game.server.controller.world.factory.WorldCreatorPlanetFactory;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
-import thederpgamer.immersiveplanets.resources.textures.TextureLoader;
-import thederpgamer.immersiveplanets.universe.world.planet.DebugPlanet;
+import thederpgamer.immersiveplanets.utils.TextureUtils;
+import thederpgamer.immersiveplanets.universe.space.planet.DebugPlanet;
 
 /**
  * PlanetSpawnController.java
@@ -25,7 +25,7 @@ public class PlanetSpawnController {
         DebugPlanet planet = new DebugPlanet(500);
 
         planet.planetSector = creatorThread.getSegmentController().getSector(new Vector3i());
-        planet.planetSprite = TextureLoader.planetSprites.get(type);
+        planet.planetSprite = TextureUtils.planetSprites.get(type);
         planet.initialize();
 
         Vector3i clientSector = GameClient.getClientPlayerState().getCurrentSector();
@@ -34,6 +34,6 @@ public class PlanetSpawnController {
             ImmersivePlanets.getInstance().planetDrawer.queueDraw(planet);
         }
 
-        creatorThread.getSegmentController().setMarkedForDeletePermanentIncludingDocks(true);
+        //creatorThread.getSegmentController().setMarkedForDeletePermanentIncludingDocks(true);
     }
 }

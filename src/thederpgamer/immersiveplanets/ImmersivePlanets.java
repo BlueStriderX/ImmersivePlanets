@@ -7,10 +7,20 @@ import api.listener.fastevents.FastListenerCommon;
 import api.mod.StarLoader;
 import api.mod.StarMod;
 import api.mod.config.FileConfiguration;
+import api.utils.textures.StarLoaderTexture;
+import org.schema.game.client.view.GameResourceLoader;
+import org.schema.schine.graphicsengine.core.Controller;
+import org.schema.schine.graphicsengine.core.ResourceException;
+import org.schema.schine.graphicsengine.forms.Sprite;
 import thederpgamer.immersiveplanets.graphics.planet.PlanetAtmosphereDrawer;
+import thederpgamer.immersiveplanets.graphics.planet.PlanetSprite;
 import thederpgamer.immersiveplanets.listeners.PlanetDrawHandler;
-import thederpgamer.immersiveplanets.resources.textures.TextureLoader;
+import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
+import thederpgamer.immersiveplanets.utils.TextureUtils;
 import thederpgamer.immersiveplanets.universe.generation.world.PlanetSpawnController;
+import javax.imageio.ImageIO;
+import java.io.IOException;
+import java.util.ArrayList;
 
 /**
  * ImmersivePlanets.java
@@ -30,6 +40,7 @@ public class ImmersivePlanets extends StarMod {
 
     //Data
     public PlanetAtmosphereDrawer planetDrawer;
+    public GameResourceLoader resLoader;
 
     //Config
     private final String[] defaultConfig = {
@@ -44,8 +55,34 @@ public class ImmersivePlanets extends StarMod {
         instance = this;
         initConfig();
         initialize();
+        loadTextures();
         registerFastListeners();
         registerEventListeners();
+    }
+
+    @Override
+    public void onLoadModels() {
+        final GameResourceLoader resLoader = (GameResourceLoader) Controller.getResLoader();
+        String[] models = new String[] {
+                "planet-sphere_0",
+                "planet-sphere_1",
+                "planet-sphere_2",
+                "planet-sphere_3",
+                "planet-sphere_4"
+        };
+
+        for(final String model : models) {
+            StarLoaderTexture.runOnGraphicsThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        resLoader.getMeshLoader().loadModMesh(ImmersivePlanets.getInstance(), model, getJarResource("thederpgamer/immersiveplanets/resources/models/planet/" + model + ".zip"), null);
+                    } catch(ResourceException | IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
     }
 
     private void initConfig() {
@@ -63,7 +100,34 @@ public class ImmersivePlanets extends StarMod {
     }
 
     private void initialize() {
-        TextureLoader.initialize();
+        resLoader = (GameResourceLoader) Controller.getResLoader();
+        TextureUtils.initialize();
+    }
+
+    private void loadTextures() {
+        StarLoaderTexture.runOnGraphicsThread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized(ImmersivePlanets.class) {
+                    try {
+                        for(WorldType worldType : WorldType.values()) {
+                            PlanetSprite planetSprite = new PlanetSprite(worldType);
+                            String typeName = worldType.toString().toLowerCase().replaceAll("_", "-");
+                            for(int res : TextureUtils.planetTextureResolutions) {
+                                planetSprite.spriteMap.put(res, StarLoaderTexture.newSprite(ImageIO.read(ImmersivePlanets.getInstance().getJarResource("thederpgamer/immersiveplanets/resources/sprites/planet/" + typeName + "_" + res + ".png")), ImmersivePlanets.getInstance(), typeName + "_" + res));
+                            }
+                            TextureUtils.planetSprites.put(worldType, planetSprite);
+
+                            ArrayList<Sprite> planetTextures = new ArrayList<>();
+                            for(int i = 0; i < 5; i ++) planetTextures.add(StarLoaderTexture.newSprite(ImageIO.read(ImmersivePlanets.getInstance().getJarResource("thederpgamer/immersiveplanets/resources/textures/planet/" + typeName + "_" + i + ".png")), ImmersivePlanets.getInstance(), typeName + "_" + i));
+                            TextureUtils.getAllPlanetTextures().put(worldType, planetTextures);
+                        }
+                    } catch(IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 
     private void registerFastListeners() {
@@ -75,6 +139,9 @@ public class ImmersivePlanets extends StarMod {
             @Override
             public void onEvent(RegisterWorldDrawersEvent event) {
                 event.getModDrawables().add(planetDrawer = new PlanetAtmosphereDrawer());
+                for(PlanetSprite planetSprite : TextureUtils.planetSprites.values()) {
+                    event.getModDrawables().add(planetSprite);
+                }
             }
         }, this);
 

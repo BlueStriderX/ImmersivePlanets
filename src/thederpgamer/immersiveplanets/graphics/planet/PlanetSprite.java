@@ -1,14 +1,11 @@
 package thederpgamer.immersiveplanets.graphics.planet;
 
-import api.utils.textures.StarLoaderTexture;
 import org.schema.schine.graphicsengine.core.Drawable;
 import org.schema.schine.graphicsengine.forms.Sprite;
-import thederpgamer.immersiveplanets.ImmersivePlanets;
-import thederpgamer.immersiveplanets.resources.textures.TextureLoader;
+import thederpgamer.immersiveplanets.utils.TextureUtils;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
-import javax.imageio.ImageIO;
+
 import java.util.HashMap;
-import java.util.Locale;
 
 /**
  * PlanetSprite.java
@@ -20,25 +17,21 @@ import java.util.Locale;
 public class PlanetSprite implements Drawable {
 
     public boolean initialized;
-    private HashMap<Integer, Sprite> spriteMap;
-    private int currentRes = TextureLoader.planetTextureResolutions[0];
+    public HashMap<Integer, Sprite> spriteMap;
+    private int currentRes = TextureUtils.planetTextureResolutions[0];
+    public WorldType worldType;
+    public boolean doDraw;
 
     public PlanetSprite(WorldType worldType) {
+        this.worldType = worldType;
         spriteMap = new HashMap<>();
-        String typeName = worldType.name().toLowerCase(Locale.ROOT).replaceAll("_", "-");
-        for(int res : TextureLoader.planetTextureResolutions) {
-            try {
-                spriteMap.put(res, StarLoaderTexture.newSprite(ImageIO.read(TextureLoader.class.getResourceAsStream(typeName + "_" + res + ".png")), ImmersivePlanets.getInstance(), typeName + "_" + res));
-            } catch(Exception exception) {
-                exception.printStackTrace();
-            }
-        }
         initialized = false;
+        doDraw = false;
     }
 
     @Override
     public void onInit() {
-        for(int res : TextureLoader.planetTextureResolutions) {
+        for(int res : TextureUtils.planetTextureResolutions) {
             try {
                 if(spriteMap.get(res) != null) {
                     Sprite sprite = spriteMap.get(res);
@@ -54,9 +47,9 @@ public class PlanetSprite implements Drawable {
 
     @Override
     public void draw() {
-        for(int res : TextureLoader.planetTextureResolutions) {
+        for(int res : TextureUtils.planetTextureResolutions) {
             try {
-                if(res == currentRes) {
+                if(res == currentRes && doDraw) {
                     spriteMap.get(res).draw();
                 } else {
                     spriteMap.get(res).cleanUp();
@@ -80,7 +73,7 @@ public class PlanetSprite implements Drawable {
 
     @Override
     public boolean isInvisible() {
-        return false;
+        return !doDraw;
     }
 
     public Sprite getSprite(int res) {
@@ -88,13 +81,13 @@ public class PlanetSprite implements Drawable {
     }
 
     public void setCurrentRes(int currentRes) {
-        for(int r : TextureLoader.planetTextureResolutions) {
+        for(int r : TextureUtils.planetTextureResolutions) {
             if(currentRes == r) {
                 this.currentRes = currentRes;
                 return;
             }
         }
-        this.currentRes = TextureLoader.planetTextureResolutions[0];
+        this.currentRes = TextureUtils.planetTextureResolutions[0];
     }
 
     private void scaleSprite(Sprite sprite, int res) {

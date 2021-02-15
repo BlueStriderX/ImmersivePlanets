@@ -10,7 +10,7 @@ import org.schema.game.server.controller.RequestDataPlanet;
 import org.schema.game.server.controller.world.factory.WorldCreatorFactory;
 import org.schema.game.server.controller.world.factory.terrain.TerrainGenerator;
 import thederpgamer.immersiveplanets.universe.generation.world.PlanetGenerationHandler;
-import thederpgamer.immersiveplanets.universe.world.Planet;
+import thederpgamer.immersiveplanets.universe.space.Planet;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 
 /**

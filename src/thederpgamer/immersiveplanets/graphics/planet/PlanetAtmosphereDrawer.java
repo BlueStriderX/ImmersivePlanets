@@ -8,9 +8,10 @@ import org.schema.game.common.controller.SegmentController;
 import org.schema.game.common.data.world.SimpleTransformableSendableObject;
 import org.schema.schine.graphicsengine.core.Drawable;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
-import thederpgamer.immersiveplanets.data.AtmosphereTransitionWarpHandler;
-import thederpgamer.immersiveplanets.resources.textures.TextureLoader;
-import thederpgamer.immersiveplanets.universe.world.Planet;
+import thederpgamer.immersiveplanets.data.handler.AtmosphereTransitionWarpHandler;
+import thederpgamer.immersiveplanets.utils.TextureUtils;
+import thederpgamer.immersiveplanets.universe.space.Planet;
+
 import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 
@@ -42,7 +43,8 @@ public class PlanetAtmosphereDrawer implements Drawable {
 
     @Override
     public void onInit() {
-        for(Planet planet : planetDrawQueue) planet.initialize();
+        ArrayList<Planet> toDraw = new ArrayList<>(planetDrawQueue);
+        for(Planet planet : toDraw) planet.initialize();
         initialized = true;
     }
 
@@ -50,23 +52,26 @@ public class PlanetAtmosphereDrawer implements Drawable {
     public void draw() {
         if(!initialized) onInit();
         Vector3i clientSector = GameClient.getClientPlayerState().getCurrentSector();
-        for(Planet planet : planetDrawQueue) {
-            if(clientSector.equals(planet.planetSector)) {
-                if(PlayerUtils.getCurrentControl(GameClient.getClientPlayerState()) != null) {
-                    SegmentController entity = (SegmentController) PlayerUtils.getCurrentControl(GameClient.getClientPlayerState());
-                    if(entity.getType().equals(SimpleTransformableSendableObject.EntityType.SHIP)) {
-                        if(runPositionCheck(planet)) {
-                            if(AtmosphereTransitionWarpHandler.inAtmosphereMap.getList(planet).contains(GameClient.getClientPlayerState())) {
-                                //Todo: Handle atmosphere exit
-                            } else {
-                                AtmosphereTransitionWarpHandler.handleReentry(entity, planet);
+        ArrayList<Planet> toDraw = new ArrayList<>(planetDrawQueue);
+        for(Planet planet : toDraw) {
+            if(clientSector != null) {
+                if (clientSector.equals(planet.planetSector)) {
+                    if (GameClient.getClientPlayerState().isControllingCore()) {
+                        SegmentController entity = (SegmentController) PlayerUtils.getCurrentControl(GameClient.getClientPlayerState());
+                        if (entity.getType().equals(SimpleTransformableSendableObject.EntityType.SHIP)) {
+                            if (runPositionCheck(planet)) {
+                                if (AtmosphereTransitionWarpHandler.inAtmosphereMap.getList(planet).contains(GameClient.getClientPlayerState())) {
+                                    //Todo: Handle atmosphere exit
+                                } else {
+                                    AtmosphereTransitionWarpHandler.handleReentry(entity, planet);
+                                }
                             }
                         }
                     }
+                } else {
+                    int distance = (int) Math.abs(Math.floor(Vector3i.getDisatance(clientSector, planet.planetSector)));
+                    drawPlanet(planet, distance);
                 }
-            } else {
-                int distance = (int) Math.abs(Math.floor(Vector3i.getDisatance(clientSector, planet.planetSector)));
-                drawPlanet(planet, distance);
             }
         }
     }
@@ -74,7 +79,8 @@ public class PlanetAtmosphereDrawer implements Drawable {
     @Override
     public void cleanUp() {
         if(initialized) {
-            for(Planet planet : planetDrawQueue) {
+            ArrayList<Planet> toDraw = new ArrayList<>(planetDrawQueue);
+            for(Planet planet : toDraw) {
                 planet.planetSprite.cleanUp();
                 planet.outerSphere.cleanUp();
                 planet.innerSphere.cleanUp();
@@ -103,26 +109,30 @@ public class PlanetAtmosphereDrawer implements Drawable {
 
     private void drawPlanet(Planet planet, int distance) {
         boolean shouldDraw = true;
-        if(distance == 0) { //full draw
-            planet.planetSprite.setCurrentRes(TextureLoader.planetTextureResolutions[0]);
-        } else if(distance == 1) {
-            planet.planetSprite.setCurrentRes(TextureLoader.planetTextureResolutions[1]);
-        } else if(distance == 2) {
-            planet.planetSprite.setCurrentRes(TextureLoader.planetTextureResolutions[2]);
-        } else if(distance == 3) {
-            planet.planetSprite.setCurrentRes(TextureLoader.planetTextureResolutions[3]);
-        } else if(distance == 4) {
-            planet.planetSprite.setCurrentRes(TextureLoader.planetTextureResolutions[4]);
-        } else if(distance >= 5) {
-            planet.planetSprite.cleanUp();
+        if(distance != 0) {
             planet.outerSphere.cleanUp();
             planet.innerSphere.cleanUp();
-            planetDrawQueue.remove(planet);
-            shouldDraw = false;
         }
+        if(distance >= 5) {
+            planet.planetSprite.doDraw = false;
+            planet.planetSprite.cleanUp();
+            shouldDraw = false;
+        } else if(distance >= 4) {
+            planet.planetSprite.setCurrentRes(TextureUtils.planetTextureResolutions[4]);
+        } else if(distance >= 3) {
+            planet.planetSprite.setCurrentRes(TextureUtils.planetTextureResolutions[3]);
+        } else if(distance >= 2) {
+            planet.planetSprite.setCurrentRes(TextureUtils.planetTextureResolutions[2]);
+        } else if(distance >= 1) {
+            planet.planetSprite.setCurrentRes(TextureUtils.planetTextureResolutions[1]);
+        } else {
+            planet.planetSprite.setCurrentRes(TextureUtils.planetTextureResolutions[0]);
+        }
+
         if(shouldDraw) {
+            planet.planetSprite.doDraw = true;
             planet.planetSprite.draw();
-            if(ImmersivePlanets.getInstance().debugMode) {
+            if(ImmersivePlanets.getInstance().debugMode && distance == 0) {
                 planet.outerSphere.draw();
                 planet.innerSphere.draw();
             } else {
