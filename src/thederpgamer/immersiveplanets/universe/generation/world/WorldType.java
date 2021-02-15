@@ -9,7 +9,7 @@ package thederpgamer.immersiveplanets.universe.generation.world;
  */
 public enum WorldType { //Todo: Make these settings configurable
     //Planets
-    PLANET_DEBUG(0, 0, 500, 1000, false);
+    PLANET_DEBUG,
 
     /*
     PLANET_EARTH(8, 16, 650, 1500, false),
@@ -27,17 +27,5 @@ public enum WorldType { //Todo: Make these settings configurable
     GAS_GIANT_GREEN(12, 24, 1500, 5000, true);
      */
 
-    public int minSegments;
-    public int maxSegments;
-    public float minRadius;
-    public float maxRadius;
-    public boolean hasCompression;
-
-    WorldType(int minSegments, int maxSegments, float minRadius, float maxRadius, boolean hasCompression) {
-        this.minSegments = minSegments;
-        this.maxSegments = maxSegments;
-        this.minRadius = minRadius;
-        this.maxRadius = maxRadius;
-        this.hasCompression = hasCompression;
-    }
+    OTHER_RING
 }

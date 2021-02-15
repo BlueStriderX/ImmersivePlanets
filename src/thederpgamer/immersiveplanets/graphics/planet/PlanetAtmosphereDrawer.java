@@ -11,7 +11,6 @@ import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.handler.AtmosphereTransitionWarpHandler;
 import thederpgamer.immersiveplanets.utils.TextureUtils;
 import thederpgamer.immersiveplanets.universe.space.Planet;
-
 import javax.vecmath.Vector3f;
 import java.util.ArrayList;
 
@@ -130,7 +129,8 @@ public class PlanetAtmosphereDrawer implements Drawable {
         }
 
         if(shouldDraw) {
-            planet.planetSprite.doDraw = true;
+            //planet.planetSprite.doDraw = true;
+            planet.planetSprite.doDraw = false;
             planet.planetSprite.draw();
             if(ImmersivePlanets.getInstance().debugMode && distance == 0) {
                 planet.outerSphere.draw();
