@@ -117,15 +117,15 @@ public class PlanetAtmosphereDrawer implements Drawable {
             planet.planetSprite.cleanUp();
             shouldDraw = false;
         } else if(distance >= 4) {
-            planet.planetSprite.setCurrentRes(TextureUtils.planetTextureResolutions[4]);
+            planet.planetSprite.setCurrentRes(TextureUtils.PlanetTextureResolution.RES_128.getRes());
         } else if(distance >= 3) {
-            planet.planetSprite.setCurrentRes(TextureUtils.planetTextureResolutions[3]);
+            planet.planetSprite.setCurrentRes(TextureUtils.PlanetTextureResolution.RES_256.getRes());
         } else if(distance >= 2) {
-            planet.planetSprite.setCurrentRes(TextureUtils.planetTextureResolutions[2]);
+            planet.planetSprite.setCurrentRes(TextureUtils.PlanetTextureResolution.RES_512.getRes());
         } else if(distance >= 1) {
-            planet.planetSprite.setCurrentRes(TextureUtils.planetTextureResolutions[1]);
+            planet.planetSprite.setCurrentRes(TextureUtils.PlanetTextureResolution.RES_1024.getRes());
         } else {
-            planet.planetSprite.setCurrentRes(TextureUtils.planetTextureResolutions[0]);
+            planet.planetSprite.setCurrentRes(TextureUtils.PlanetTextureResolution.RES_2048.getRes());
         }
 
         if(shouldDraw) {

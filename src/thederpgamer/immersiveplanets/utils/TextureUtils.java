@@ -16,7 +16,29 @@ import java.util.HashMap;
  */
 public class TextureUtils {
 
-    public final static int[] planetTextureResolutions = {2048, 1024, 512, 256, 128};
+    public enum PlanetTextureResolution {
+            RES_2048(0),
+            RES_1024(1),
+            RES_512(2),
+            RES_256(3),
+            RES_128(4);
+
+            public int level;
+
+            PlanetTextureResolution(int level) {
+                this.level = level;
+            }
+
+            @Override
+            public String toString() {
+                return super.toString().toLowerCase().split("_")[1];
+            }
+
+            public int getRes() {
+                return Integer.parseInt(toString());
+            }
+    }
+
     public final static HashMap<WorldType, PlanetSprite> planetSprites = new HashMap<>();
     private final static HashList<WorldType, Sprite> planetTextures = new HashList<>();
 

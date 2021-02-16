@@ -18,7 +18,7 @@ public class PlanetSprite implements Drawable {
 
     public boolean initialized;
     public HashMap<Integer, Sprite> spriteMap;
-    private int currentRes = TextureUtils.planetTextureResolutions[0];
+    private int currentRes = TextureUtils.PlanetTextureResolution.RES_2048.getRes();
     public WorldType worldType;
     public boolean doDraw;
 
@@ -31,13 +31,13 @@ public class PlanetSprite implements Drawable {
 
     @Override
     public void onInit() {
-        for(int res : TextureUtils.planetTextureResolutions) {
+        for(TextureUtils.PlanetTextureResolution res : TextureUtils.PlanetTextureResolution.values()) {
             try {
-                if(spriteMap.get(res) != null) {
-                    Sprite sprite = spriteMap.get(res);
+                if(spriteMap.get(res.getRes()) != null) {
+                    Sprite sprite = spriteMap.get(res.getRes());
                     sprite.onInit();
                     sprite.setBillboard(true);
-                    scaleSprite(sprite, res);
+                    scaleSprite(sprite, res.getRes());
                 }
             } catch (Exception exception) {
                 exception.printStackTrace();
@@ -47,12 +47,12 @@ public class PlanetSprite implements Drawable {
 
     @Override
     public void draw() {
-        for(int res : TextureUtils.planetTextureResolutions) {
+        for(TextureUtils.PlanetTextureResolution res : TextureUtils.PlanetTextureResolution.values()) {
             try {
-                if(res == currentRes && doDraw) {
-                    spriteMap.get(res).draw();
+                if(res.getRes() == currentRes && doDraw) {
+                    spriteMap.get(res.getRes()).draw();
                 } else {
-                    spriteMap.get(res).cleanUp();
+                    spriteMap.get(res.getRes()).cleanUp();
                 }
             } catch (Exception exception) {
                 exception.printStackTrace();
@@ -81,13 +81,13 @@ public class PlanetSprite implements Drawable {
     }
 
     public void setCurrentRes(int currentRes) {
-        for(int r : TextureUtils.planetTextureResolutions) {
-            if(currentRes == r) {
+        for(TextureUtils.PlanetTextureResolution res : TextureUtils.PlanetTextureResolution.values()) {
+            if(currentRes == res.getRes()) {
                 this.currentRes = currentRes;
                 return;
             }
         }
-        this.currentRes = TextureUtils.planetTextureResolutions[0];
+        this.currentRes = TextureUtils.PlanetTextureResolution.RES_2048.getRes();
     }
 
     private void scaleSprite(Sprite sprite, int res) {

@@ -107,15 +107,14 @@ public class ImmersivePlanets extends StarMod {
                 synchronized(ImmersivePlanets.class) {
                     try {
                         for(WorldType worldType : WorldType.values()) {
+                            ArrayList<Sprite> planetTextures = new ArrayList<>();
                             PlanetSprite planetSprite = new PlanetSprite(worldType);
                             String typeName = worldType.toString().toLowerCase().replaceAll("_", "-");
-                            for(int res : TextureUtils.planetTextureResolutions) {
-                                planetSprite.spriteMap.put(res, StarLoaderTexture.newSprite(ImageIO.read(ImmersivePlanets.getInstance().getJarResource("thederpgamer/immersiveplanets/resources/sprites/planet/" + typeName + "_" + res + ".png")), ImmersivePlanets.getInstance(), typeName + "_" + res));
+                            for(TextureUtils.PlanetTextureResolution res : TextureUtils.PlanetTextureResolution.values()) {
+                                planetSprite.spriteMap.put(res.getRes(), StarLoaderTexture.newSprite(ImageIO.read(ImmersivePlanets.getInstance().getJarResource("thederpgamer/immersiveplanets/resources/sprites/planet/" + typeName + "_" + res.level + ".png")), ImmersivePlanets.getInstance(), typeName + "_" + res.level));
+                                planetTextures.add(StarLoaderTexture.newSprite(ImageIO.read(ImmersivePlanets.getInstance().getJarResource("thederpgamer/immersiveplanets/resources/textures/planet/" + typeName + "_" + res.level + ".png")), ImmersivePlanets.getInstance(), typeName + "_" + res.level));
                             }
                             TextureUtils.planetSprites.put(worldType, planetSprite);
-
-                            ArrayList<Sprite> planetTextures = new ArrayList<>();
-                            for(int i = 0; i < 5; i ++) planetTextures.add(StarLoaderTexture.newSprite(ImageIO.read(ImmersivePlanets.getInstance().getJarResource("thederpgamer/immersiveplanets/resources/textures/planet/" + typeName + "_" + i + ".png")), ImmersivePlanets.getInstance(), typeName + "_" + i));
                             TextureUtils.getAllPlanetTextures().put(worldType, planetTextures);
                         }
                     } catch(IOException e) {
