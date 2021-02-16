@@ -2,7 +2,7 @@
   "name": "ImmersivePlanets",
   "author": "TheDerpGamer",
   "description": "Adds larger and more immersive planets with their own atmospheres and features.",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "starmade_version": "0.202.108",
   "client_mod": false,
   "server_mod": false,

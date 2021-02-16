@@ -64,11 +64,7 @@ public class ImmersivePlanets extends StarMod {
     public void onLoadModels() {
         final GameResourceLoader resLoader = (GameResourceLoader) Controller.getResLoader();
         String[] models = new String[] {
-                "planet-sphere_0",
-                "planet-sphere_1",
-                "planet-sphere_2",
-                "planet-sphere_3",
-                "planet-sphere_4"
+                "debug_planet_0"
         };
 
         for(final String model : models) {
