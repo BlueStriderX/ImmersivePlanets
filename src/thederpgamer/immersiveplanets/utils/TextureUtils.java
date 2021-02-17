@@ -1,11 +1,12 @@
 package thederpgamer.immersiveplanets.utils;
 
+import api.common.GameClient;
 import api.utils.other.HashList;
+import org.schema.common.util.linAlg.Vector3i;
 import org.schema.schine.graphicsengine.forms.Sprite;
-import thederpgamer.immersiveplanets.graphics.planet.PlanetSprite;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
+import thederpgamer.immersiveplanets.universe.space.Planet;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * TextureUtils.java
@@ -17,11 +18,11 @@ import java.util.HashMap;
 public class TextureUtils {
 
     public enum PlanetTextureResolution {
-            RES_2048(0),
-            RES_1024(1),
-            RES_512(2),
-            RES_256(3),
-            RES_128(4);
+            RES_2048(0);
+            //RES_1024(1),
+            //RES_512(2),
+            //RES_256(3),
+            //RES_128(4);
 
             public int level;
 
@@ -39,12 +40,7 @@ public class TextureUtils {
             }
     }
 
-    public final static HashMap<WorldType, PlanetSprite> planetSprites = new HashMap<>();
-    private final static HashList<WorldType, Sprite> planetTextures = new HashList<>();
-
-    public static void initialize() {
-        for(WorldType worldType : WorldType.values()) planetSprites.put(worldType, new PlanetSprite(worldType));
-    }
+    public final static HashList<WorldType, Sprite> planetTextures = new HashList<>();
 
     public static Sprite getPlanetTexture(WorldType worldType, int level) {
         return planetTextures.getList(worldType).get(level);
@@ -56,5 +52,22 @@ public class TextureUtils {
 
     public static HashList<WorldType, Sprite> getAllPlanetTextures() {
         return planetTextures;
+    }
+
+    public static int getCurrentLevel(Planet planet) {
+        float distance = Math.abs(Vector3i.getDisatance(planet.planetSector, GameClient.getClientPlayerState().getCurrentSector()));
+        if(distance >= 5) {
+            return -1;
+        } else if(distance >= 4) {
+            return 4;
+        } else if(distance >= 3) {
+            return 3;
+        } else if(distance >= 2) {
+            return 2;
+        } else if(distance >= 1) {
+            return 1;
+        } else {
+            return 0;
+        }
     }
 }

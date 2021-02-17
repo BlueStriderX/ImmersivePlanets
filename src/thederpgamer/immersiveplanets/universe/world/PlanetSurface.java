@@ -1,6 +1,6 @@
 package thederpgamer.immersiveplanets.universe.world;
 
-import thederpgamer.immersiveplanets.data.geometry.MappedIcosahedron;
+import thederpgamer.immersiveplanets.data.world.chunk.DynamicChunkQueue;
 import thederpgamer.immersiveplanets.universe.space.Planet;
 
 /**
@@ -12,7 +12,11 @@ import thederpgamer.immersiveplanets.universe.space.Planet;
  */
 public class PlanetSurface {
 
-    private MappedIcosahedron icosahedron;
     private Planet planet;
+    private DynamicChunkQueue loadQueue;
+
+    public PlanetSurface(Planet planet) {
+
+    }
 
 }

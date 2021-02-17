@@ -12,7 +12,7 @@ import thederpgamer.immersiveplanets.universe.space.Planet;
  */
 public class DebugPlanet extends Planet {
 
-    public DebugPlanet(float radius) {
-        super(radius, WorldType.PLANET_DEBUG);
+    public DebugPlanet(float radius, long worldId) {
+        super(radius, WorldType.PLANET_DEBUG, worldId);
     }
 }

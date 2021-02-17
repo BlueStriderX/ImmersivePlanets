@@ -1,5 +1,6 @@
 package thederpgamer.immersiveplanets;
 
+import api.common.GameCommon;
 import api.listener.Listener;
 import api.listener.events.controller.planet.PlanetGenerateEvent;
 import api.listener.events.draw.RegisterWorldDrawersEvent;
@@ -12,13 +13,13 @@ import org.schema.game.client.view.GameResourceLoader;
 import org.schema.schine.graphicsengine.core.Controller;
 import org.schema.schine.graphicsengine.core.ResourceException;
 import org.schema.schine.graphicsengine.forms.Sprite;
-import thederpgamer.immersiveplanets.graphics.planet.PlanetAtmosphereDrawer;
-import thederpgamer.immersiveplanets.graphics.planet.PlanetSprite;
-import thederpgamer.immersiveplanets.listeners.PlanetDrawHandler;
+import thederpgamer.immersiveplanets.graphics.planet.PlanetDrawer;
+import thederpgamer.immersiveplanets.listener.PlanetDrawHandler;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 import thederpgamer.immersiveplanets.utils.TextureUtils;
-import thederpgamer.immersiveplanets.universe.generation.world.PlanetSpawnController;
+import thederpgamer.immersiveplanets.universe.generation.world.PlanetSpawnHandler;
 import javax.imageio.ImageIO;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -39,7 +40,13 @@ public class ImmersivePlanets extends StarMod {
     }
 
     //Data
-    public PlanetAtmosphereDrawer planetDrawer;
+    public File playerDataFolder;
+    public File planetDataFolder;
+    public File chunkDataFolder;
+
+    //Resources
+    public PlanetDrawHandler planetDrawHandler;
+    public PlanetDrawer planetDrawer;
     public GameResourceLoader resLoader;
 
     //Config
@@ -64,7 +71,7 @@ public class ImmersivePlanets extends StarMod {
     public void onLoadModels() {
         final GameResourceLoader resLoader = (GameResourceLoader) Controller.getResLoader();
         String[] models = new String[] {
-                "debug_planet_0"
+                "planet_debug_0"
         };
 
         for(final String model : models) {
@@ -97,7 +104,18 @@ public class ImmersivePlanets extends StarMod {
 
     private void initialize() {
         resLoader = (GameResourceLoader) Controller.getResLoader();
-        TextureUtils.initialize();
+        try {
+            playerDataFolder = new File(getSkeleton().getResourcesFolder().getPath() + "/data/" + GameCommon.getUniqueContextId() + "/playerdata");
+            if(!planetDataFolder.exists()) planetDataFolder.createNewFile();
+
+            planetDataFolder = new File(getSkeleton().getResourcesFolder().getPath() + "/data/" + GameCommon.getUniqueContextId() + "/planetdata");
+            if(!planetDataFolder.exists()) planetDataFolder.createNewFile();
+
+            chunkDataFolder = new File(getSkeleton().getResourcesFolder().getPath() + "/data/" + GameCommon.getUniqueContextId() + "/chunkdata");
+            if(!chunkDataFolder.exists()) chunkDataFolder.createNewFile();
+        } catch(IOException exception) {
+            exception.printStackTrace();
+        }
     }
 
     private void loadTextures() {
@@ -108,14 +126,11 @@ public class ImmersivePlanets extends StarMod {
                     try {
                         for(WorldType worldType : WorldType.values()) {
                             ArrayList<Sprite> planetTextures = new ArrayList<>();
-                            PlanetSprite planetSprite = new PlanetSprite(worldType);
-                            String typeName = worldType.toString().toLowerCase().replaceAll("_", "-");
+                            String typeName = worldType.toString().toLowerCase();
                             for(TextureUtils.PlanetTextureResolution res : TextureUtils.PlanetTextureResolution.values()) {
-                                planetSprite.spriteMap.put(res.getRes(), StarLoaderTexture.newSprite(ImageIO.read(ImmersivePlanets.getInstance().getJarResource("thederpgamer/immersiveplanets/resources/sprites/planet/" + typeName + "_" + res.level + ".png")), ImmersivePlanets.getInstance(), typeName + "_" + res.level));
                                 planetTextures.add(StarLoaderTexture.newSprite(ImageIO.read(ImmersivePlanets.getInstance().getJarResource("thederpgamer/immersiveplanets/resources/textures/planet/" + typeName + "_" + res.level + ".png")), ImmersivePlanets.getInstance(), typeName + "_" + res.level));
                             }
-                            TextureUtils.planetSprites.put(worldType, planetSprite);
-                            TextureUtils.getAllPlanetTextures().put(worldType, planetTextures);
+                            TextureUtils.planetTextures.put(worldType, planetTextures);
                         }
                     } catch(IOException e) {
                         e.printStackTrace();
@@ -126,24 +141,21 @@ public class ImmersivePlanets extends StarMod {
     }
 
     private void registerFastListeners() {
-        FastListenerCommon.planetDrawListeners.add(new PlanetDrawHandler());
+        FastListenerCommon.planetDrawListeners.add(planetDrawHandler = new PlanetDrawHandler());
     }
 
     private void registerEventListeners() {
         StarLoader.registerListener(RegisterWorldDrawersEvent.class, new Listener<RegisterWorldDrawersEvent>() {
             @Override
             public void onEvent(RegisterWorldDrawersEvent event) {
-                event.getModDrawables().add(planetDrawer = new PlanetAtmosphereDrawer());
-                for(PlanetSprite planetSprite : TextureUtils.planetSprites.values()) {
-                    event.getModDrawables().add(planetSprite);
-                }
+                event.getModDrawables().add(planetDrawer = new PlanetDrawer());
             }
         }, this);
 
         StarLoader.registerListener(PlanetGenerateEvent.class, new Listener<PlanetGenerateEvent>() {
             @Override
             public void onEvent(PlanetGenerateEvent event) {
-                PlanetSpawnController.handlePlanetCreation(event.getCreatorThread(), event.getRequestData(), event.getFactory(), event.getSegment());
+                PlanetSpawnHandler.handlePlanetCreation(event.getCreatorThread(), event.getRequestData(), event.getFactory(), event.getSegment());
             }
         }, this);
     }

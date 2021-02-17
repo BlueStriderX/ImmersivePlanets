@@ -9,7 +9,7 @@ package thederpgamer.immersiveplanets.universe.generation.world;
  */
 public enum WorldType { //Todo: Make these settings configurable
     //Planets
-    PLANET_DEBUG,
+    PLANET_DEBUG;
 
     /*
     PLANET_EARTH(8, 16, 650, 1500, false),
@@ -27,5 +27,12 @@ public enum WorldType { //Todo: Make these settings configurable
     GAS_GIANT_GREEN(12, 24, 1500, 5000, true);
      */
 
-    OTHER_RING
+    //OTHER_RING
+
+    public static WorldType parseWorldType(String string) {
+        for(WorldType type : WorldType.values()) {
+            if(string.equals(type.toString())) return type;
+        }
+        return PLANET_DEBUG;
+    }
 }
