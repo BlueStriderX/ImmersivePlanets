@@ -3,7 +3,6 @@ package thederpgamer.immersiveplanets;
 import api.common.GameCommon;
 import api.listener.Listener;
 import api.listener.events.controller.planet.PlanetGenerateEvent;
-import api.listener.events.draw.RegisterWorldDrawersEvent;
 import api.listener.fastevents.FastListenerCommon;
 import api.mod.StarLoader;
 import api.mod.StarMod;
@@ -14,7 +13,6 @@ import org.schema.schine.graphicsengine.core.Controller;
 import org.schema.schine.graphicsengine.core.ResourceException;
 import org.schema.schine.graphicsengine.forms.Sprite;
 import thederpgamer.immersiveplanets.graphics.planet.PlanetDrawer;
-import thederpgamer.immersiveplanets.listener.PlanetDrawHandler;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 import thederpgamer.immersiveplanets.utils.TextureUtils;
 import thederpgamer.immersiveplanets.universe.generation.world.PlanetSpawnHandler;
@@ -45,31 +43,32 @@ public class ImmersivePlanets extends StarMod {
     public File chunkDataFolder;
 
     //Resources
-    public PlanetDrawHandler planetDrawHandler;
     public PlanetDrawer planetDrawer;
     public GameResourceLoader resLoader;
 
     //Config
     private final String[] defaultConfig = {
             "debug-mode: false",
-            "instanced-sector-dist: 10000"
+            "instanced-sector-dist: 10000",
+            "max-planets-drawn: 5"
     };
     public boolean debugMode = false;
     public int instancedSectorDist = 10000;
+    public int maxPlanetsDrawn = 5;
 
     @Override
     public void onEnable() {
         instance = this;
         initConfig();
-        initialize();
         loadTextures();
+        initialize();
         registerFastListeners();
         registerEventListeners();
     }
 
     @Override
     public void onLoadModels() {
-        final GameResourceLoader resLoader = (GameResourceLoader) Controller.getResLoader();
+        resLoader = (GameResourceLoader) Controller.getResLoader();
         String[] models = new String[] {
                 "planet_debug_0"
         };
@@ -98,24 +97,9 @@ public class ImmersivePlanets extends StarMod {
             config.set("instanced-sector-dist", 5000);
             instancedSectorDist = 5000;
         }
+        maxPlanetsDrawn = config.getConfigurableInt("max-planets-drawn", 5);
 
         config.saveConfig();
-    }
-
-    private void initialize() {
-        resLoader = (GameResourceLoader) Controller.getResLoader();
-        try {
-            playerDataFolder = new File(getSkeleton().getResourcesFolder().getPath() + "/data/" + GameCommon.getUniqueContextId() + "/playerdata");
-            if(!planetDataFolder.exists()) planetDataFolder.createNewFile();
-
-            planetDataFolder = new File(getSkeleton().getResourcesFolder().getPath() + "/data/" + GameCommon.getUniqueContextId() + "/planetdata");
-            if(!planetDataFolder.exists()) planetDataFolder.createNewFile();
-
-            chunkDataFolder = new File(getSkeleton().getResourcesFolder().getPath() + "/data/" + GameCommon.getUniqueContextId() + "/chunkdata");
-            if(!chunkDataFolder.exists()) chunkDataFolder.createNewFile();
-        } catch(IOException exception) {
-            exception.printStackTrace();
-        }
     }
 
     private void loadTextures() {
@@ -140,18 +124,28 @@ public class ImmersivePlanets extends StarMod {
         });
     }
 
+    private void initialize() {
+        File dataFolder = new File(getSkeleton().getResourcesFolder() + "/data");
+        if(!dataFolder.exists()) dataFolder.mkdirs();
+
+        File instanceFolder = new File(getSkeleton().getResourcesFolder() + "/data/" + GameCommon.getUniqueContextId());
+        if(!instanceFolder.exists()) instanceFolder.mkdirs();
+
+        playerDataFolder = new File(getSkeleton().getResourcesFolder() + "/data/" + GameCommon.getUniqueContextId() + "/playerdata");
+        if(!playerDataFolder.exists()) playerDataFolder.mkdirs();
+
+        planetDataFolder = new File(getSkeleton().getResourcesFolder() + "/data/" + GameCommon.getUniqueContextId() + "/planetdata");
+        if(!planetDataFolder.exists()) planetDataFolder.mkdirs();
+
+        chunkDataFolder = new File(getSkeleton().getResourcesFolder() + "/data/" + GameCommon.getUniqueContextId() + "/chunkdata");
+        if(!chunkDataFolder.exists()) chunkDataFolder.mkdirs();
+    }
+
     private void registerFastListeners() {
-        FastListenerCommon.planetDrawListeners.add(planetDrawHandler = new PlanetDrawHandler());
+        FastListenerCommon.planetDrawListeners.add(planetDrawer = new PlanetDrawer());
     }
 
     private void registerEventListeners() {
-        StarLoader.registerListener(RegisterWorldDrawersEvent.class, new Listener<RegisterWorldDrawersEvent>() {
-            @Override
-            public void onEvent(RegisterWorldDrawersEvent event) {
-                event.getModDrawables().add(planetDrawer = new PlanetDrawer());
-            }
-        }, this);
-
         StarLoader.registerListener(PlanetGenerateEvent.class, new Listener<PlanetGenerateEvent>() {
             @Override
             public void onEvent(PlanetGenerateEvent event) {

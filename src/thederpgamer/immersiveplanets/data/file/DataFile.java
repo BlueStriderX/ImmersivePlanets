@@ -80,20 +80,24 @@ public abstract class DataFile implements Serializable {
     }
 
     public void setValue(String path, Object... value) {
-        String valueString;
-        if(value.length > 1) {
-            StringBuilder builder = new StringBuilder();
-            builder.append("{");
-            for(int i = 0; i < value.length; i ++) {
-                builder.append(value[i].toString());
-                if(i < value.length - 1) builder.append(", ");
+        try {
+            String valueString;
+            if(value.length > 1) {
+                StringBuilder builder = new StringBuilder();
+                builder.append("{");
+                for(int i = 0; i < value.length; i++) {
+                    builder.append(value[i].toString());
+                    if(i < value.length - 1) builder.append(", ");
+                }
+                builder.append("}");
+                valueString = builder.toString();
+            } else {
+                valueString = value[0].toString();
             }
-            builder.append("}");
-            valueString = builder.toString();
-        } else {
-            valueString = value[0].toString();
+            values.put(path, valueString);
+        } catch(Exception e) {
+            e.printStackTrace();
         }
-        values.put(path, valueString);
     }
 
     public String getValue(String path) {

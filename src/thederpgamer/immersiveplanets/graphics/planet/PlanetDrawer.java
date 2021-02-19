@@ -1,11 +1,15 @@
 package thederpgamer.immersiveplanets.graphics.planet;
 
-import org.schema.schine.graphicsengine.core.Drawable;
+import api.DebugFile;
+import api.listener.fastevents.PlanetDrawListener;
+import api.utils.StarRunnable;
+import org.schema.common.util.linAlg.Vector3i;
+import org.schema.game.client.view.planetdrawer.PlanetInformations;
+import org.schema.game.common.data.Dodecahedron;
+import org.schema.game.common.data.world.SectorInformation;
+import org.schema.schine.graphicsengine.forms.Mesh;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.universe.space.Planet;
-import thederpgamer.immersiveplanets.utils.DataUtils;
-import thederpgamer.immersiveplanets.utils.TextureUtils;
-import java.util.ArrayList;
 
 /**
  * PlanetDrawer.java
@@ -14,78 +18,46 @@ import java.util.ArrayList;
  * Created 02/13/2021
  * @author TheDerpGamer
  */
-public class PlanetDrawer implements Drawable {
+public class PlanetDrawer implements PlanetDrawListener {
 
-    private boolean initialized;
-    private ArrayList<Planet> drawList;
+    private PlanetDrawData[] drawData;
 
     public PlanetDrawer() {
-        initialized = false;
-        drawList = new ArrayList<>();
-    }
+        drawData = new PlanetDrawData[ImmersivePlanets.getInstance().maxPlanetsDrawn];
 
-    @Override
-    public void onInit() {
-        updateQueue();
-        for(Planet planet : drawList) {
-            planet.outerSphere.onInit();
-            planet.innerSphere.onInit();
-            planet.atmosphereMesh.onInit();
-        }
-    }
-
-    @Override
-    public void draw() {
-        updateQueue();
-        boolean doCleanup = false;
-        for(Planet planet : drawList) {
-            int level = TextureUtils.getCurrentLevel(planet);
-            if(ImmersivePlanets.getInstance().debugMode && level == 0) {
-                planet.outerSphere.draw();
-                planet.innerSphere.draw();
-            } else {
-                planet.outerSphere.cleanUp();
-                planet.innerSphere.cleanUp();
+        new StarRunnable() {
+            @Override
+            public void run() {
+                update();
             }
+        }.runTimer(ImmersivePlanets.getInstance(), 100);
+    }
 
-            if(level == 0) {
-                planet.atmosphereMesh.draw();
-            //} else if(level > 0 && level < 5) {
-                //planet.getPlanetSprite(level).draw();
-            } else {
-                doCleanup = true;
+    private void update() {
+        for(PlanetDrawData data : drawData) data.update();
+    }
+
+    public void addPlanet(Planet planet) {
+        for(int i = 0; i < drawData.length; i ++) {
+            if(drawData[i].drawMode == PlanetDrawData.MODE_NONE) {
+                drawData[i] = new PlanetDrawData(planet);
+                return;
             }
         }
-        if(doCleanup) cleanUp();
+        DebugFile.log("[WARNING]: Cannot draw planet " + planet.planetId + planet.planetSector.toString() +
+                " as the max planets able to be drawn at once is currently set at " +
+                ImmersivePlanets.getInstance().maxPlanetsDrawn + ".", ImmersivePlanets.getInstance());
     }
 
-    @Override
-    public void cleanUp() {
-        updateQueue();
-        for(Planet planet : drawList) {
-            planet.outerSphere.cleanUp();
-            planet.innerSphere.cleanUp();
-            planet.atmosphereMesh.cleanUp();
+    public boolean contains(Vector3i sector) {
+        for(PlanetDrawData data : drawData) {
+            if(data.sector.equals(sector)) return true;
         }
-    }
-
-    @Override
-    public boolean isInvisible() {
         return false;
     }
 
-    private void updateQueue() {
-        ArrayList<Planet> planetList = DataUtils.getAllPlanets();
-        ArrayList<Planet> toRemove = new ArrayList<>();
-        for(Planet planet : planetList) {
-            int currentLevel = TextureUtils.getCurrentLevel(planet);
-            if(drawList.contains(planet)) {
-                if(currentLevel == -1) toRemove.add(planet);
-            } else {
-                if(currentLevel != -1) drawList.add(planet);
-            }
-        }
-
-        for(Planet planet : toRemove) drawList.remove(planet);
+    @Override
+    public void onPlanetDraw(org.schema.game.client.view.planetdrawer.PlanetDrawer internalDrawer, Vector3i vector3i, PlanetInformations planetInformations, SectorInformation.PlanetType planetType, Mesh mesh, Dodecahedron dodecahedron) {
+        for(PlanetDrawData data : drawData) data.draw();
     }
 }

@@ -1,11 +1,11 @@
 package thederpgamer.immersiveplanets.data.file;
 
 import org.schema.common.util.linAlg.Vector3i;
-import thederpgamer.immersiveplanets.data.other.vector.Vector2i;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 import thederpgamer.immersiveplanets.universe.space.Planet;
 import thederpgamer.immersiveplanets.utils.DataUtils;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -19,7 +19,11 @@ public class PlanetData extends DataFile {
 
     public PlanetData(File dataFile) {
         super(dataFile);
-        initialize(getPlanet());
+        try {
+            loadValues();
+        } catch (FileNotFoundException exception) {
+            exception.printStackTrace();
+        }
     }
 
     public PlanetData(Planet planet) {
@@ -27,42 +31,59 @@ public class PlanetData extends DataFile {
         initialize(planet);
     }
 
-    private void initialize(Planet planet) {
+    public void initialize(Planet planet) {
         setValue("planetId", planet.planetId);
         setValue("factionId", planet.factionId);
-        setValue("name", planet.name);
         setValue("sector", planet.planetSector);
         setValue("radius", planet.radius);
         setValue("type", planet.worldType);
         try {
             saveValues();
+            loadValues();
         } catch (IOException exception) {
             exception.printStackTrace();
         }
     }
 
     public long getPlanetId() {
-        return Long.parseLong(getValue("planetId"));
+        try {
+            return Long.parseLong(getValue("planetId"));
+        } catch(Exception e) {
+            return -1;
+        }
     }
 
     public int getFactionId() {
-        return Integer.parseInt(getValue("factionId"));
-    }
-
-    public String getName() {
-        return getValue("name");
+        try {
+            return Integer.parseInt(getValue("factionId"));
+        } catch(Exception e) {
+            return 0;
+        }
     }
 
     public Vector3i getSector() {
-        return Vector3i.parseVector3i(getValue("sector"));
+        try {
+            String[] sectorString = getValue("sector").substring(1, getValue("sector").length() - 1).split(", ");
+            return new Vector3i(Integer.parseInt(sectorString[0]), Integer.parseInt(sectorString[1]), Integer.parseInt(sectorString[2]));
+        } catch(Exception e) {
+            return new Vector3i();
+        }
     }
 
-    public float getRadius() {
-        return Float.parseFloat(getValue("radius"));
+    public int getRadius() {
+        try {
+            return Integer.parseInt(getValue("radius"));
+        } catch(Exception e) {
+            return 500;
+        }
     }
 
     public WorldType getType() {
-        return WorldType.parseWorldType(getValue("type"));
+        try {
+            return WorldType.parseWorldType(getValue("type"));
+        } catch(Exception e) {
+            return WorldType.PLANET_DEBUG;
+        }
     }
 
     public Planet getPlanet() {

@@ -19,12 +19,11 @@ public class PlanetSpawnHandler {
 
     public static void handlePlanetCreation(PlanetCreatorThread creatorThread, RequestDataPlanet requestData, WorldCreatorPlanetFactory factory, Segment segment) {
         //Todo: Debug type is only for testing purposes, should generate actual planet type based on factors like temperature and location
-        DebugPlanet planet = new DebugPlanet(500, DataUtils.getNewPlanetId());
+        if(DataUtils.getFromSector(creatorThread.getSegmentController().getSector(new Vector3i())) == null) {
+            DebugPlanet planet = new DebugPlanet(500, DataUtils.getNewPlanetId(), creatorThread.getSegmentController().getSector(new Vector3i()));
+            planet.initialize();
 
-        planet.planetSector = creatorThread.getSegmentController().getSector(new Vector3i());
-        planet.initialize();
-        planet.getData();
-
-        //creatorThread.getSegmentController().setMarkedForDeletePermanentIncludingDocks(true);
+            //creatorThread.getSegmentController().setMarkedForDeletePermanentIncludingDocks(true);
+        }
     }
 }

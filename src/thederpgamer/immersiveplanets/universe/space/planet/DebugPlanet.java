@@ -1,5 +1,6 @@
 package thederpgamer.immersiveplanets.universe.space.planet;
 
+import org.schema.common.util.linAlg.Vector3i;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 import thederpgamer.immersiveplanets.universe.space.Planet;
 
@@ -12,7 +13,7 @@ import thederpgamer.immersiveplanets.universe.space.Planet;
  */
 public class DebugPlanet extends Planet {
 
-    public DebugPlanet(float radius, long worldId) {
-        super(radius, WorldType.PLANET_DEBUG, worldId);
+    public DebugPlanet(int radius, long worldId, Vector3i planetSector) {
+        super(radius, WorldType.PLANET_DEBUG, worldId, planetSector);
     }
 }

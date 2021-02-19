@@ -19,7 +19,7 @@ import java.util.Objects;
 public class DataUtils {
 
     public static File getPlayerDataFile(String playerName) {
-        File playerDataFile = new File(ImmersivePlanets.getInstance().planetDataFolder.getPath() + "/" + playerName + ".smdat");
+        File playerDataFile = new File(ImmersivePlanets.getInstance().planetDataFolder + "/" + playerName + ".smdat");
         try {
             if (!playerDataFile.exists()) playerDataFile.createNewFile();
         } catch (IOException exception) {
@@ -29,7 +29,7 @@ public class DataUtils {
     }
 
     public static File getChunkDataFile(long planetId) {
-        File chunkDataFile = new File(ImmersivePlanets.getInstance().chunkDataFolder.getPath() + "/" + planetId + ".smdat");
+        File chunkDataFile = new File(ImmersivePlanets.getInstance().chunkDataFolder + "/" + planetId + ".smdat");
         try {
             if(!chunkDataFile.exists()) chunkDataFile.createNewFile();
         } catch (IOException exception) {
@@ -39,7 +39,7 @@ public class DataUtils {
     }
 
     public static File getPlanetDataFile(long planetId) {
-        File planetDataFile = new File(ImmersivePlanets.getInstance().planetDataFolder.getPath() + "/" + planetId + ".smdat");
+        File planetDataFile = new File(ImmersivePlanets.getInstance().planetDataFolder + "/" + planetId + ".smdat");
         try {
             if(!planetDataFile.exists()) planetDataFile.createNewFile();
         } catch (IOException exception) {

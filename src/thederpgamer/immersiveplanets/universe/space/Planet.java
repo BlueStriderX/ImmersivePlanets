@@ -1,12 +1,9 @@
 package thederpgamer.immersiveplanets.universe.space;
 
 import org.schema.common.util.linAlg.Vector3i;
-import org.schema.schine.graphicsengine.forms.Mesh;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.file.PlanetData;
-import thederpgamer.immersiveplanets.graphics.other.BoundingSphere;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
-import javax.vecmath.Vector4f;
 
 /**
  * Planet.java
@@ -18,24 +15,18 @@ import javax.vecmath.Vector4f;
 public class Planet {
 
     public long planetId;
-    public float radius;
+    public int radius;
     public Vector3i planetSector;
 
     public WorldType worldType;
     public PlanetSegment[] segments;
-
-    public Mesh atmosphereMesh;
-    public BoundingSphere outerSphere;
-    public BoundingSphere innerSphere;
-
     public int factionId;
-    public String name;
 
     public Planet(PlanetData planetData) {
-        this(planetData.getRadius(), planetData.getType(), planetData.getPlanetId(), planetData.getFactionId(), planetData.getName());
+        this(planetData.getRadius(), planetData.getType(), planetData.getPlanetId(), planetData.getFactionId(), planetData.getSector());
     }
 
-    public Planet(float radius, WorldType worldType, long planetId, int factionId, String name) {
+    public Planet(int radius, WorldType worldType, long planetId, int factionId, Vector3i planetSector) {
         this.planetId = planetId;
         this.radius = radius;
         this.segments = new PlanetSegment[20];
@@ -44,23 +35,17 @@ public class Planet {
             //String meshName = worldType.toString().toLowerCase() + "_" + resolution.level;
             //atmosphereMeshes.put(resolution.level, ImmersivePlanets.getInstance().resLoader.getMeshLoader().getModMesh(ImmersivePlanets.getInstance(), meshName));
         //}
-        atmosphereMesh = ImmersivePlanets.getInstance().resLoader.getMeshLoader().getModMesh(ImmersivePlanets.getInstance(), "planet_debug_0");
-        (outerSphere = new BoundingSphere(radius)).setColor(new Vector4f(0.75f, 0.75f, 0.75f, 0.3f));
-        (innerSphere = new BoundingSphere(radius * 0.9f)).setColor(new Vector4f(0.35f, 0.35f, 0.35f, 0.5f));
 
+        this.planetSector = planetSector;
         this.factionId = factionId;
-        this.name = name;
-        initialize();
     }
 
-    public Planet(float radius, WorldType worldType, long planetId) {
-        this(radius, worldType, planetId, 0, "Planet");
+    public Planet(int radius, WorldType worldType, long planetId, Vector3i planetSector) {
+        this(radius, worldType, planetId, 0, planetSector);
     }
 
     public void initialize() {
-        atmosphereMesh.onInit();
-        outerSphere.onInit();
-        innerSphere.onInit();
+        new PlanetData(this);
     }
 
     public Vector3i getRealSector() {
@@ -73,9 +58,5 @@ public class Planet {
         } else {
             return i + (ImmersivePlanets.getInstance().instancedSectorDist * -1);
         }
-    }
-
-    public PlanetData getData() {
-        return new PlanetData(this);
     }
 }
