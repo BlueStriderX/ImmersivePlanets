@@ -18,6 +18,8 @@ import java.util.Objects;
  */
 public class DataUtils {
 
+    private static ArrayList<Planet> planets = new ArrayList<>();
+
     public static File getPlayerDataFile(String playerName) {
         File playerDataFile = new File(ImmersivePlanets.getInstance().planetDataFolder + "/" + playerName + ".smdat");
         try {
@@ -48,16 +50,30 @@ public class DataUtils {
         return planetDataFile;
     }
 
-    public static ArrayList<Planet> getAllPlanets() {
-        ArrayList<Planet> planets = new ArrayList<>();
+    public static void loadPlanets() {
+        planets.clear();
+        ArrayList<File> toDelete = new ArrayList<>();
+        ArrayList<PlanetData> dataList = new ArrayList<>();
+        ArrayList<Vector3i> sectorList = new ArrayList<>();
         for(File planetDataFile : Objects.requireNonNull(ImmersivePlanets.getInstance().planetDataFolder.listFiles())) {
-            planets.add(new PlanetData(planetDataFile).getPlanet());
+            PlanetData pData = new PlanetData(planetDataFile);
+            if(!sectorList.contains(pData.getSector())) {
+                sectorList.add(pData.getSector());
+                dataList.add(pData);
+            } else {
+                toDelete.add(planetDataFile);
+            }
         }
+
+        for(PlanetData pData : dataList) planets.add(new Planet(pData));
+        for(File file : toDelete) file.delete();
+    }
+
+    public static ArrayList<Planet> getPlanets() {
         return planets;
     }
 
     public static Planet getFromSector(Vector3i sector) {
-        ArrayList<Planet> planets = getAllPlanets();
         for(Planet planet : planets) {
             if(planet.planetSector.equals(sector)) return planet;
         }
@@ -65,6 +81,7 @@ public class DataUtils {
     }
 
     public static long getNewPlanetId() {
-        return getAllPlanets().size();
+        loadPlanets();
+        return getPlanets().size();
     }
 }
