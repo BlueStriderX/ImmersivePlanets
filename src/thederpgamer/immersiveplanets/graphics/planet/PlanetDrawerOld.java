@@ -67,7 +67,7 @@ public class PlanetDrawerOld implements PlanetDrawListener {
     }
 
     @Override
-    public void onPlanetDraw(org.schema.game.client.view.planetdrawer.PlanetDrawer internalDrawer, Vector3i sector, PlanetInformations planetInformations, SectorInformation.PlanetType planetType, Mesh sphere, Dodecahedron dodecahedron) {
+    public void onPlanetDraw(Vector3i sector, PlanetInformations planetInformations, SectorInformation.PlanetType planetType, Mesh sphere, Dodecahedron dodecahedron) {
         if(!contains(sector) && DataUtils.getFromSector(sector) != null) addPlanet(DataUtils.getFromSector(sector));
         for(PlanetDrawData data : drawData) {
             if(data != null) {

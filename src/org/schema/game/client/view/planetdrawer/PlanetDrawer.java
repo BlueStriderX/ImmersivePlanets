@@ -172,7 +172,7 @@ public class PlanetDrawer implements Drawable {
             this.sphere.draw();
             //INSERTED CODE @197
             for(PlanetDrawListener drawListener : FastListenerCommon.planetDrawListeners) {
-                drawListener.onPlanetDraw(this, absSecPos, infos, type, sphere, dodecahedron);
+                drawListener.onPlanetDraw(absSecPos, infos, type, sphere, dodecahedron);
             }
             //
         }
