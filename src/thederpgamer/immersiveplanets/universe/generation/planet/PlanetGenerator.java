@@ -10,12 +10,12 @@ import org.schema.game.server.controller.RequestDataPlanet;
 import org.schema.game.server.controller.world.factory.WorldCreatorFactory;
 import org.schema.game.server.controller.world.factory.terrain.TerrainGenerator;
 import thederpgamer.immersiveplanets.universe.generation.world.PlanetGenerationHandler;
-import thederpgamer.immersiveplanets.universe.space.Planet;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
+import thederpgamer.immersiveplanets.universe.space.world.WorldEntity;
 
 /**
  * PlanetGenerator.java
- * New planet generation base
+ * New planetOld generation base
  * ==================================================
  * Created 02/13/2021
  * @author TheDerpGamer
@@ -29,7 +29,7 @@ public abstract class PlanetGenerator extends WorldCreatorFactory {
     public WorldType worldType;
 
     public PlanetGenerationHandler generator;
-    public Planet planet;
+    public WorldEntity worldEntity;
 
     public PlanetGenerator(float radius, long seed, Vector3i sector, WorldType worldType) {
         this.initialized = false;

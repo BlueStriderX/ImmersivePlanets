@@ -26,7 +26,7 @@ import org.schema.game.server.data.ServerConfig;
 
 /**
  * PlanetCreatorThread.java
- * Planet Creation Handler (modified)
+ * PlanetOld Creation Handler (modified)
  * ==================================================
  * Modified 02/12/2021
  */

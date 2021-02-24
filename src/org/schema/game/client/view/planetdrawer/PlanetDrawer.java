@@ -1,5 +1,6 @@
 package org.schema.game.client.view.planetdrawer;
 
+import api.DebugFile;
 import api.listener.fastevents.FastListenerCommon;
 import api.listener.fastevents.PlanetDrawListener;
 import com.bulletphysics.linearmath.Transform;
@@ -24,14 +25,13 @@ import org.schema.schine.graphicsengine.forms.Mesh;
 import org.schema.schine.graphicsengine.shader.Shader;
 import org.schema.schine.graphicsengine.shader.ShaderLibrary;
 import org.schema.schine.graphicsengine.shader.Shaderable;
-import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
-import thederpgamer.immersiveplanets.universe.space.planet.DebugPlanet;
-import thederpgamer.immersiveplanets.utils.DataUtils;
-import thederpgamer.immersiveplanets.utils.TextureUtils;
+import thederpgamer.immersiveplanets.ImmersivePlanets;
+import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
+import thederpgamer.immersiveplanets.universe.space.world.WorldEntity;
 
 /**
  * PlanetDrawer.java
- * Planet Draw Handler (modified)
+ * PlanetOld Draw Handler (modified)
  * ==================================================
  * Modified 02/12/2021
  */
@@ -100,9 +100,12 @@ public class PlanetDrawer implements Drawable {
             this.trans.origin.set(this.absSectorCenterPos);
         }
 
-
-        if(absSecPos != null && DataUtils.getFromSector(absSecPos) == null) {
-            (new DebugPlanet(500, DataUtils.getNewPlanetId(), absSecPos)).initialize();
+        WorldEntity worldEntity;
+        if((worldEntity = UniverseDatabase.getFromSector(absSecPos)) != null) {
+            ImmersivePlanets.getInstance().worldEntityDrawer.addDrawData(worldEntity.toWorldData().getDrawData());
+        } else {
+            DebugFile.log("[ERROR]: Planet at " + absSecPos.toString() + " doesn't exist in server database!", ImmersivePlanets.getInstance());
+            //Todo: Figure out some way of fixing this error or preventing the player from entering the sector
         }
 
         if (!Controller.getCamera().isBoundingSphereInFrustrum(this.trans.origin, this.dodecahedron.radius + 50.0F)) {
@@ -169,7 +172,6 @@ public class PlanetDrawer implements Drawable {
             GL11.glDepthRange(0.0D, 1.0D);
             GlUtil.glDepthMask(true);
             this.sphere.unloadVBO(true);
-            this.sphere.draw();
             //INSERTED CODE @197
             for(PlanetDrawListener drawListener : FastListenerCommon.planetDrawListeners) {
                 drawListener.onPlanetDraw(absSecPos, infos, type, sphere, dodecahedron);
@@ -196,20 +198,13 @@ public class PlanetDrawer implements Drawable {
 
     public void onInit() {
         this.sphere = (Mesh) Controller.getResLoader().getMesh("Sphere").getChilds().iterator().next();
-        this.sphere.setVertCount(872);
-        this.sphere.setFaceCount(900);
-        this.sphere.getScale().scale(5);
-        this.sphere.updateBound();
-        this.sphere.setMaterial(TextureUtils.getPlanetTexture(WorldType.PLANET_DEBUG, 0).getMaterial());
-        //this.sphere = Controller.getResLoader().getMeshLoader().getModMesh(ImmersivePlanets.getInstance(), "planet_debug_0");
         this.dodecahedron = new Dodecahedron(200.0F);
         this.dodecahedron.create();
         this.planetShaderable = new PlanetDrawer.PlanetShaderable();
         this.atmoShaderable = new PlanetDrawer.AtmoShaderable();
         float var1 = this.state.getGameState().getPlanetSizeMean();
         float var2 = this.state.getGameState().getPlanetSizeDeviation();
-        //this.atmosphereSize = (var1 + var2) / 275.0F;
-        this.atmosphereSize = 750.0f;
+        this.atmosphereSize = (var1 + var2) / 275.0F;
     }
 
     public void setPlanetSectorPos(Vector3i var1) {

@@ -42,8 +42,8 @@ import org.schema.schine.resource.tag.Tag;
 import org.schema.schine.resource.tag.Tag.Type;
 
 /**
- * Planet.java
- * Planet entity class (modified)
+ * PlanetOld.java
+ * PlanetOld entity class (modified)
  * ==================================================
  * Modified 02/12/2021
  */
@@ -117,7 +117,7 @@ public class Planet extends ManagedUsableSegmentController<Planet> {
     public void initialize() {
         super.initialize();
         this.setMass(0.0F);
-        this.setRealName("Planet");
+        this.setRealName("PlanetOld");
     }
 
     public boolean isGravitySource() {
@@ -225,7 +225,7 @@ public class Planet extends ManagedUsableSegmentController<Planet> {
     }
 
     public void fromTagStructure(Tag var1) {
-        assert var1.getName().equals("Planet");
+        assert var1.getName().equals("PlanetOld");
 
         Tag[] var2;
         if ((var2 = (Tag[])var1.getValue())[0].getType() == Type.BYTE && var2[1].getType() == Type.STRING) {
@@ -239,7 +239,7 @@ public class Planet extends ManagedUsableSegmentController<Planet> {
 
     public void setFactionId(int var1) {
         if (this.blownOffDebug) {
-            System.err.println("[PLANET] Cannot set faction on blown up planet");
+            System.err.println("[PLANET] Cannot set faction on blown up planetOld");
             var1 = 0;
         }
 
@@ -264,7 +264,7 @@ public class Planet extends ManagedUsableSegmentController<Planet> {
     }
 
     public Tag toTagStructure() {
-        return new Tag(Type.STRUCT, "Planet", new Tag[]{new Tag(Type.BYTE, (String)null, (byte)(this.fragmentId + 1)), new Tag(Type.STRING, (String)null, this.getPlanetCoreUID()), super.toTagStructure(), FinishTag.INST});
+        return new Tag(Type.STRUCT, "PlanetOld", new Tag[]{new Tag(Type.BYTE, (String)null, (byte)(this.fragmentId + 1)), new Tag(Type.STRING, (String)null, this.getPlanetCoreUID()), super.toTagStructure(), FinishTag.INST});
     }
 
     public boolean isRankAllowedToChangeFaction(int var1, PlayerState var2, byte var3) {
@@ -303,7 +303,7 @@ public class Planet extends ManagedUsableSegmentController<Planet> {
     }
 
     protected String getSegmentControllerTypeString() {
-        return "Planet";
+        return "PlanetOld";
     }
 
     public void newNetworkObject() {
@@ -331,7 +331,7 @@ public class Planet extends ManagedUsableSegmentController<Planet> {
     }
 
     public String toString() {
-        return "Planet(" + this.getId() + ")[s" + this.getSectorId() + "]" + this.getPlanetInfo();
+        return "PlanetOld(" + this.getId() + ")[s" + this.getSectorId() + "]" + this.getPlanetInfo();
     }
 
     protected boolean canObjectOverlap(Physical var1) {
@@ -353,7 +353,7 @@ public class Planet extends ManagedUsableSegmentController<Planet> {
     public void updateLocal(Timer var1) {
         super.updateLocal(var1);
         if (this.isOnServer() && this.getTotalElements() <= 0 && System.currentTimeMillis() - this.getTimeCreated() > 50000L && this.isEmptyOnServer() && this.getSegmentBuffer().isFullyLoaded()) {
-            System.err.println("[SERVER][Planet] Empty planet section: deleting " + this);
+            System.err.println("[SERVER][PlanetOld] Empty planetOld section: deleting " + this);
             this.setMarkedForDeleteVolatile(true);
         }
 
@@ -362,7 +362,7 @@ public class Planet extends ManagedUsableSegmentController<Planet> {
             this.core = (PlanetCore)var2;
         }
 
-        if (this.core != null && !this.getRealName().equals("Planet") && !this.core.getRealName().equals(this.getRealName())) {
+        if (this.core != null && !this.getRealName().equals("PlanetOld") && !this.core.getRealName().equals(this.getRealName())) {
             this.core.setRealNameToAll(this.getRealName());
         }
 
