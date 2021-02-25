@@ -13,7 +13,6 @@ import org.lwjgl.opengl.GL11;
 import org.schema.common.util.linAlg.TransformTools;
 import org.schema.common.util.linAlg.Vector3i;
 import org.schema.game.client.data.GameClientState;
-import org.schema.game.common.controller.Planet;
 import org.schema.game.common.data.Dodecahedron;
 import org.schema.game.common.data.world.SectorInformation.PlanetType;
 import org.schema.game.common.data.world.space.PlanetCore;
@@ -28,10 +27,11 @@ import org.schema.schine.graphicsengine.shader.ShaderLibrary;
 import org.schema.schine.graphicsengine.shader.Shaderable;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
+import thederpgamer.immersiveplanets.data.world.WorldData;
 
 /**
  * PlanetDrawer.java
- * PlanetOld Draw Handler (modified)
+ * Planet Draw Handler (modified)
  * ==================================================
  * Modified 02/12/2021
  */
@@ -100,12 +100,9 @@ public class PlanetDrawer implements Drawable {
             this.trans.origin.set(this.absSectorCenterPos);
         }
 
-        Planet planet;
-        if((planet = UniverseDatabase.getFromSector(absSecPos)) != null) {
-            ImmersivePlanets.getInstance().worldEntityDrawer.addDrawData(planet.toWorldData().getDrawData());
-        } else {
-            DebugFile.log("[ERROR]: Planet at " + absSecPos.toString() + " doesn't exist in server database!", ImmersivePlanets.getInstance());
-            //Todo: Figure out some way of fixing this error or preventing the player from entering the sector
+        WorldData worldData;
+        if((worldData = UniverseDatabase.getFromSector(this.relSectorPos)) != null) {
+            ImmersivePlanets.getInstance().worldEntityDrawer.addDrawData(worldData.getDrawData());
         }
 
         if (!Controller.getCamera().isBoundingSphereInFrustrum(this.trans.origin, this.dodecahedron.radius + 50.0F)) {

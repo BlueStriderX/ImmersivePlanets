@@ -9,11 +9,17 @@ package thederpgamer.immersiveplanets.universe.generation.world;
  */
 public enum WorldType { //Todo: Make these settings configurable
     //Planets
-    PLANET_DEBUG;
+    PLANET_DEBUG("planet_debug");
+
+    public String name;
+
+    WorldType(String name) {
+        this.name = name;
+    }
 
     public static WorldType parseWorldType(String string) {
         for(WorldType type : WorldType.values()) {
-            if(string.equals(type.toString())) return type;
+            if(string.equals(type.name)) return type;
         }
         return PLANET_DEBUG;
     }

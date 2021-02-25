@@ -14,8 +14,8 @@ public class TextureLoader {
 
     private static HashMap<String, Sprite> spriteMap = new HashMap<>();
 
-    public static void addMaterial(String name, Sprite sprite) {
-        spriteMap.put(name, sprite);
+    public static void addSprite(Sprite sprite) {
+        spriteMap.put(sprite.getName(), sprite);
     }
 
     public static Sprite getSprite(String name) {

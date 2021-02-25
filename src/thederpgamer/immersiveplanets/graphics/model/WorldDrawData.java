@@ -8,7 +8,6 @@ import org.schema.schine.graphicsengine.core.Controller;
 import org.schema.schine.graphicsengine.core.Drawable;
 import org.schema.schine.graphicsengine.forms.Mesh;
 import org.schema.schine.graphicsengine.forms.Sprite;
-import org.schema.schine.graphicsengine.texture.Material;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.world.WorldData;
 import thederpgamer.immersiveplanets.graphics.other.BoundingSphere;
@@ -33,8 +32,8 @@ public class WorldDrawData implements Drawable {
     private Mesh atmosphereLayer;
     private Mesh cloudLayer;
     private Mesh atmosphereSimple;
-    private Material atmosphereTexture;
-    private Material cloudTexture;
+    private Sprite atmosphereTexture;
+    private Sprite cloudTexture;
     private Sprite[] sprites;
 
     private boolean debugMode = ImmersivePlanets.getInstance().debugMode;
@@ -50,23 +49,23 @@ public class WorldDrawData implements Drawable {
         cloudLayer = Controller.getResLoader().getMeshLoader().getModMesh(ImmersivePlanets.getInstance(), "planet_sphere");
         atmosphereSimple = (Mesh) Controller.getResLoader().getMesh("Sphere").getChilds().iterator().next();
 
-        atmosphereTexture = TextureLoader.getSprite(worldData.getWorldType().toString().toLowerCase() + "_atmosphere").getMaterial();
-        cloudTexture = TextureLoader.getSprite(worldData.getWorldType().toString().toLowerCase() + "_clouds").getMaterial();
+        (atmosphereTexture = TextureLoader.getSprite(worldData.getWorldType().name + "_atmosphere")).onInit();
+        (cloudTexture = TextureLoader.getSprite(worldData.getWorldType().name + "_clouds")).onInit();
 
         debugOuterSphere = new BoundingSphere(radius);
         debugInnerSphere = new BoundingSphere(radius * 0.95f);
 
         sprites = new Sprite[] {
-                TextureLoader.getSprite(worldData.getWorldType().toString().toLowerCase() + "_64"),
-                TextureLoader.getSprite(worldData.getWorldType().toString().toLowerCase() + "_256"),
-                TextureLoader.getSprite(worldData.getWorldType().toString().toLowerCase() + "_512")
+                TextureLoader.getSprite(worldData.getWorldType().name + "_64"),
+                TextureLoader.getSprite(worldData.getWorldType().name + "_256"),
+                TextureLoader.getSprite(worldData.getWorldType().name + "_512")
         };
     }
 
     @Override
     public void onInit() {
-        atmosphereLayer.setMaterial(atmosphereTexture);
-        cloudLayer.setMaterial(cloudTexture);
+        atmosphereLayer.setMaterial(atmosphereTexture.getMaterial());
+        cloudLayer.setMaterial(cloudTexture.getMaterial());
         debugOuterSphere.onInit();
         debugInnerSphere.onInit();
         updaterStarted = false;

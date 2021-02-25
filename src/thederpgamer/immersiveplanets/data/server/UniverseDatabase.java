@@ -3,11 +3,11 @@ package thederpgamer.immersiveplanets.data.server;
 import api.common.GameServer;
 import api.mod.config.PersistentObjectUtil;
 import org.schema.common.util.linAlg.Vector3i;
-import org.schema.game.common.controller.Planet;
-import org.schema.game.common.controller.generator.PlanetCreatorThread;
-import org.schema.game.server.controller.world.factory.WorldCreatorPlanetFactory;
+import org.schema.game.common.data.world.Sector;
+import org.schema.game.common.data.world.space.PlanetCore;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.world.WorldData;
+import thederpgamer.immersiveplanets.graphics.model.WorldDrawData;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,34 +23,34 @@ public class UniverseDatabase {
 
     private static ImmersivePlanets instance = ImmersivePlanets.getInstance();
     private static HashMap<Long, WorldData> worldMap = new HashMap<>();
+    public static HashMap<Long, WorldDrawData> drawMap = new HashMap<>();
 
-    public static Planet getFromId(long worldId) {
-        return worldMap.get(worldId).toEntity();
+    public static Sector getSectorFromId(int sectorId) {
+        return GameServer.getUniverse().getSector(sectorId);
     }
 
-    public static Planet getFromSector(Vector3i sector) {
-        for(WorldData data : worldMap.values()) {
-            if(data.getSector().equals(sector)) return data.toEntity();
+    public static WorldData getFromId(long worldId) {
+        return worldMap.get(worldId);
+    }
+
+    public static WorldData getFromEntityId(int entityId) {
+        for(WorldData worldData : worldMap.values()) {
+            if(worldData.getEntityId() == entityId) return worldData;
         }
         return null;
     }
 
-    public static WorldData addNewWorld(PlanetCreatorThread creatorThread, WorldCreatorPlanetFactory factory) {
-        long worldId = getNewWorldId();
-        int entityId = creatorThread.getSegmentController().getId();
-        float radius = factory.radius;
-        WorldType worldType = WorldType.PLANET_DEBUG; //Todo: Convert world type
-        Vector3i sector = creatorThread.getSegmentController().getSector(new Vector3i());
-        WorldData worldData = new WorldData(worldId, entityId, radius, worldType, sector);
-        worldMap.put(worldId, worldData);
-        return worldData;
+    public static WorldData getFromSector(Vector3i sector) {
+        for(WorldData worldData : worldMap.values()) {
+            if(worldData.getSector().equals(sector)) return worldData;
+        }
+        return null;
     }
 
-    public static long getIdFromPlanet(Planet planet) {
-        for(long id : worldMap.keySet()){
-            if(worldMap.get(id).getSector().equals(planet.getSector(new Vector3i()))) return id;
-        }
-        return -1;
+    public static void addNewWorld(PlanetCore planetCore, Vector3i sector) {
+        WorldData worldData = new WorldData(getNewWorldId(), planetCore.getId(), planetCore.getRadius(), WorldType.PLANET_DEBUG, sector);
+        planetCore.setWorldData(worldData);
+        worldMap.put(worldData.getWorldId(), worldData);
     }
 
     private static long getNewWorldId() {
@@ -78,18 +78,18 @@ public class UniverseDatabase {
     }
 
     public static void saveAllData() {
-        for(WorldData data : worldMap.values()) {
-            PersistentObjectUtil.addObject(instance.getSkeleton(), data);
+        for(WorldData worldData : worldMap.values()) {
+            PersistentObjectUtil.addObject(instance.getSkeleton(), worldData);
         }
         PersistentObjectUtil.save(instance.getSkeleton());
     }
 
-    public static void saveData(Planet entity) {
-        saveData(entity.toWorldData());
+    public static void saveData(PlanetCore planetCore) {
+        saveData(planetCore.getWorldData());
     }
 
-    public static void saveData(WorldData data) {
-        PersistentObjectUtil.addObject(instance.getSkeleton(), data);
+    public static void saveData(WorldData worldData) {
+        PersistentObjectUtil.addObject(instance.getSkeleton(), worldData);
         PersistentObjectUtil.save(instance.getSkeleton());
     }
 }

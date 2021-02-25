@@ -2,11 +2,12 @@ package thederpgamer.immersiveplanets;
 
 import api.DebugFile;
 import api.listener.Listener;
-import api.listener.events.controller.planet.PlanetGenerateEvent;
 import api.listener.events.draw.RegisterWorldDrawersEvent;
+import api.listener.events.world.PlanetCreateEvent;
 import api.mod.StarLoader;
 import api.mod.StarMod;
 import api.mod.config.FileConfiguration;
+import api.utils.StarRunnable;
 import api.utils.textures.StarLoaderTexture;
 import org.apache.commons.io.IOUtils;
 import org.schema.schine.graphicsengine.core.Controller;
@@ -40,6 +41,7 @@ public class ImmersivePlanets extends StarMod {
 
     //Data
     public WorldEntityDrawer worldEntityDrawer;
+    private final String texturePath = "thederpgamer/immersiveplanets/resources/textures/planet/";
 
     //Config
     private final String[] defaultConfig = {
@@ -60,15 +62,14 @@ public class ImmersivePlanets extends StarMod {
     public void onEnable() {
         instance = this;
         initConfig();
-        loadTextures();
         initialize();
-        registerFastListeners();
+        loadTextures();
         registerEventListeners();
     }
 
     @Override
     public byte[] onClassTransform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] byteCode) {
-        if(className.endsWith("PlanetCreatorThread") || className.endsWith("Planet") || className.endsWith("PlanetDrawer") || className.endsWith("PlanetShaderable") || className.endsWith("AtmoShaderable")) {
+        if(className.endsWith("PlanetCreatorThread") || className.endsWith("PlanetCore") || className.endsWith("PlanetDrawer") || className.endsWith("PlanetShaderable") || className.endsWith("AtmoShaderable")) {
             return overwriteClass(className, byteCode);
         } else {
             return super.onClassTransform(loader, className, classBeingRedefined, protectionDomain, byteCode);
@@ -117,9 +118,16 @@ public class ImmersivePlanets extends StarMod {
                 synchronized(ImmersivePlanets.class) {
                     try {
                         for(WorldType worldType : WorldType.values()) {
-                            String[] imageNames = getImageNames(worldType);
+                            String[] imageNames = {
+                                    worldType.name + "_atmosphere",
+                                    worldType.name + "_clouds",
+                                    worldType.name + "_64",
+                                    worldType.name + "_256",
+                                    worldType.name + "_512"
+                            };
+
                             for(String imageName : imageNames) {
-                                TextureLoader.addMaterial(imageName, StarLoaderTexture.newSprite(ImageIO.read(getJarResource("thederpgamer/immersiveplanets/resources/textures/planet/" + imageName + ".png")), ImmersivePlanets.getInstance(), imageName));
+                                TextureLoader.addSprite(StarLoaderTexture.newSprite(ImageIO.read(getJarResource(texturePath + imageName + ".png")), ImmersivePlanets.getInstance(), imageName));
                             }
                         }
                     } catch(IOException e) {
@@ -132,10 +140,13 @@ public class ImmersivePlanets extends StarMod {
 
     private void initialize() {
         UniverseDatabase.loadAllData();
-    }
 
-    private void registerFastListeners() {
-        //FastListenerCommon.planetDrawListeners.add(planetDrawerOld = new PlanetDrawerOld());
+        new StarRunnable() {
+            @Override
+            public void run() {
+                UniverseDatabase.saveAllData();
+            }
+        }.runTimer(this, 3000);
     }
 
     private void registerEventListeners() {
@@ -146,10 +157,10 @@ public class ImmersivePlanets extends StarMod {
             }
         }, this);
 
-        StarLoader.registerListener(PlanetGenerateEvent.class, new Listener<PlanetGenerateEvent>() {
+        StarLoader.registerListener(PlanetCreateEvent.class, new Listener<PlanetCreateEvent>() {
             @Override
-            public void onEvent(PlanetGenerateEvent event) {
-                UniverseDatabase.addNewWorld(event.getCreatorThread(), event.getFactory());
+            public void onEvent(PlanetCreateEvent event) {
+                UniverseDatabase.addNewWorld(event.getPlanetCore(), event.getSectorPos());
             }
         }, this);
     }
@@ -175,16 +186,5 @@ public class ImmersivePlanets extends StarMod {
         } else {
             return byteCode;
         }
-    }
-
-    private String[] getImageNames(WorldType worldType) {
-        String typeString = worldType.toString().toLowerCase();
-        return new String[] {
-                typeString + "_atmosphere",
-                typeString + "_clouds",
-                typeString + "_64",
-                typeString + "_256",
-                typeString + "_512"
-        };
     }
 }

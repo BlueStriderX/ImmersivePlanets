@@ -2,7 +2,8 @@ package thederpgamer.immersiveplanets.data.world;
 
 import api.common.GameCommon;
 import org.schema.common.util.linAlg.Vector3i;
-import org.schema.game.common.controller.Planet;
+import org.schema.game.common.data.world.space.PlanetCore;
+import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
 import thederpgamer.immersiveplanets.graphics.model.WorldDrawData;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 import java.io.Serializable;
@@ -16,20 +17,19 @@ import java.io.Serializable;
  */
 public class WorldData implements Serializable {
 
-    private WorldDrawData drawData;
     private long worldId;
     private int entityId;
     private float radius;
     private String worldType;
-    private int[] sector;
+    private Vector3i sector;
 
     public WorldData(long worldId, int entityId, float radius, WorldType worldType, Vector3i sector) {
         this.worldId = worldId;
         this.entityId = entityId;
         this.radius = radius;
         this.worldType = worldType.toString();
-        this.sector = new int[] {sector.x, sector.y, sector.z};
-        this.drawData = new WorldDrawData(this);
+        this.sector = sector;
+        UniverseDatabase.drawMap.put(worldId, new WorldDrawData(this));
     }
 
     public WorldType getWorldType() {
@@ -49,14 +49,16 @@ public class WorldData implements Serializable {
     }
 
     public Vector3i getSector() {
-        return new Vector3i(sector[0], sector[1], sector[2]);
+        return sector;
     }
 
-    public Planet toEntity() {
-        return (Planet) GameCommon.getGameObject(getEntityId());
+    public PlanetCore toPlanet() {
+        PlanetCore planetCore;
+        (planetCore = (PlanetCore) GameCommon.getGameObject(getEntityId())).setWorldData(this);
+        return planetCore;
     }
 
     public WorldDrawData getDrawData() {
-        return drawData;
+        return UniverseDatabase.drawMap.get(worldId);
     }
 }
