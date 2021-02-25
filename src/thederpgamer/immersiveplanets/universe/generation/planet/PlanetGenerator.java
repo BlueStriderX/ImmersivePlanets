@@ -1,6 +1,7 @@
 package thederpgamer.immersiveplanets.universe.generation.planet;
 
 import org.schema.common.util.linAlg.Vector3i;
+import org.schema.game.common.controller.Planet;
 import org.schema.game.common.controller.SegmentController;
 import org.schema.game.common.data.world.Chunk16SegmentData;
 import org.schema.game.common.data.world.Segment;
@@ -11,7 +12,6 @@ import org.schema.game.server.controller.world.factory.WorldCreatorFactory;
 import org.schema.game.server.controller.world.factory.terrain.TerrainGenerator;
 import thederpgamer.immersiveplanets.universe.generation.world.PlanetGenerationHandler;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
-import thederpgamer.immersiveplanets.universe.space.world.WorldEntity;
 
 /**
  * PlanetGenerator.java
@@ -29,7 +29,7 @@ public abstract class PlanetGenerator extends WorldCreatorFactory {
     public WorldType worldType;
 
     public PlanetGenerationHandler generator;
-    public WorldEntity worldEntity;
+    public Planet planet;
 
     public PlanetGenerator(float radius, long seed, Vector3i sector, WorldType worldType) {
         this.initialized = false;

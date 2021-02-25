@@ -9,13 +9,13 @@ import api.mod.StarMod;
 import api.mod.config.FileConfiguration;
 import api.utils.textures.StarLoaderTexture;
 import org.apache.commons.io.IOUtils;
-import org.schema.game.client.view.GameResourceLoader;
+import org.schema.schine.graphicsengine.core.Controller;
+import org.schema.schine.graphicsengine.core.ResourceException;
 import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
 import thederpgamer.immersiveplanets.graphics.texture.TextureLoader;
 import thederpgamer.immersiveplanets.graphics.universe.WorldEntityDrawer;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 import javax.imageio.ImageIO;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.ProtectionDomain;
@@ -38,8 +38,7 @@ public class ImmersivePlanets extends StarMod {
         return instance;
     }
 
-    //Resources
-    public GameResourceLoader resLoader;
+    //Data
     public WorldEntityDrawer worldEntityDrawer;
 
     //Config
@@ -69,19 +68,17 @@ public class ImmersivePlanets extends StarMod {
 
     @Override
     public byte[] onClassTransform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] byteCode) {
-        if(className.endsWith("PlanetCreatorThread") || className.endsWith("PlanetOld") || className.endsWith("PlanetDrawer") || className.endsWith("PlanetShaderable") || className.endsWith("AtmoShaderable")) {
+        if(className.endsWith("PlanetCreatorThread") || className.endsWith("Planet") || className.endsWith("PlanetDrawer") || className.endsWith("PlanetShaderable") || className.endsWith("AtmoShaderable")) {
             return overwriteClass(className, byteCode);
         } else {
             return super.onClassTransform(loader, className, classBeingRedefined, protectionDomain, byteCode);
         }
     }
 
-    /*
     @Override
     public void onLoadModels() {
-        resLoader = (GameResourceLoader) Controller.getResLoader();
         String[] models = new String[] {
-                "planet_debug_0"
+                "planet_sphere"
         };
 
         for(final String model : models) {
@@ -89,7 +86,7 @@ public class ImmersivePlanets extends StarMod {
                 @Override
                 public void run() {
                     try {
-                        resLoader.getMeshLoader().loadModMesh(ImmersivePlanets.getInstance(), model, getJarResource("thederpgamer/immersiveplanets/resources/models/planetOld/" + model + ".zip"), null);
+                        Controller.getResLoader().getMeshLoader().loadModMesh(ImmersivePlanets.getInstance(), model, getJarResource("thederpgamer/immersiveplanets/resources/models/planet/" + model + ".zip"), null);
                     } catch(ResourceException | IOException e) {
                         e.printStackTrace();
                     }
@@ -97,7 +94,6 @@ public class ImmersivePlanets extends StarMod {
             });
         }
     }
-     */
 
     private void initConfig() {
         FileConfiguration config = getConfig("config");

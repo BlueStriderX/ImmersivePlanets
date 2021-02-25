@@ -171,4 +171,12 @@ public class WorldDrawData implements Drawable {
     private void cleanupSprites() {
         for(Sprite sprite : sprites) sprite.cleanUp();
     }
+
+    public float getRadius() {
+        return radius;
+    }
+
+    public long getWorldId() {
+        return worldId;
+    }
 }

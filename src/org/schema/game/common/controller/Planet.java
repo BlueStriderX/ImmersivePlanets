@@ -40,6 +40,9 @@ import org.schema.schine.physics.Physical;
 import org.schema.schine.resource.tag.FinishTag;
 import org.schema.schine.resource.tag.Tag;
 import org.schema.schine.resource.tag.Tag.Type;
+import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
+import thederpgamer.immersiveplanets.data.world.WorldData;
+import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 
 /**
  * PlanetOld.java
@@ -61,12 +64,21 @@ public class Planet extends ManagedUsableSegmentController<Planet> {
     private boolean transientMoved;
     private boolean checkEmpty;
 
+    private long worldId;
+    private float radius;
+    private WorldType worldType;
+
     public Planet(StateInterface var1) {
         super(var1);
         this.planetType = PlanetType.EARTH;
         this.planetCoreUID = "none";
         this.planetManagerContainer = new PlanetManagerContainer(var1, this);
         this.aiConfiguration = new AIPlanetConfiguration(var1, this);
+
+        //Todo: Generate planet stats
+        this.worldId = UniverseDatabase.getIdFromPlanet(this);
+        this.radius = 750.0f;
+        this.worldType = WorldType.PLANET_DEBUG;
     }
 
     public EntityType getType() {
@@ -188,6 +200,22 @@ public class Planet extends ManagedUsableSegmentController<Planet> {
             this.getNetworkObject().seed.set(this.getSeed());
         }
 
+    }
+
+    public long getWorldId() {
+        return worldId;
+    }
+
+    public float getRadius() {
+        return radius;
+    }
+
+    public WorldType getWorldType() {
+        return worldType;
+    }
+
+    public WorldData toWorldData() {
+        return new WorldData(getWorldId(), getId(), getRadius(), getWorldType(), getSector(new Vector3i()));
     }
 
     public void updateToNetworkObject() {

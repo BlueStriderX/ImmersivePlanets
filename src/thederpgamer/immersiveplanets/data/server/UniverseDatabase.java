@@ -3,12 +3,12 @@ package thederpgamer.immersiveplanets.data.server;
 import api.common.GameServer;
 import api.mod.config.PersistentObjectUtil;
 import org.schema.common.util.linAlg.Vector3i;
+import org.schema.game.common.controller.Planet;
 import org.schema.game.common.controller.generator.PlanetCreatorThread;
 import org.schema.game.server.controller.world.factory.WorldCreatorPlanetFactory;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.world.WorldData;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
-import thederpgamer.immersiveplanets.universe.space.world.WorldEntity;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,11 +24,11 @@ public class UniverseDatabase {
     private static ImmersivePlanets instance = ImmersivePlanets.getInstance();
     private static HashMap<Long, WorldData> worldMap = new HashMap<>();
 
-    public static WorldEntity getFromId(long worldId) {
+    public static Planet getFromId(long worldId) {
         return worldMap.get(worldId).toEntity();
     }
 
-    public static WorldEntity getFromSector(Vector3i sector) {
+    public static Planet getFromSector(Vector3i sector) {
         for(WorldData data : worldMap.values()) {
             if(data.getSector().equals(sector)) return data.toEntity();
         }
@@ -46,9 +46,17 @@ public class UniverseDatabase {
         return worldData;
     }
 
+    public static long getIdFromPlanet(Planet planet) {
+        for(long id : worldMap.keySet()){
+            if(worldMap.get(id).getSector().equals(planet.getSector(new Vector3i()))) return id;
+        }
+        return -1;
+    }
+
     private static long getNewWorldId() {
         ArrayList<Long> toRemove = new ArrayList<>();
         long worldId = -1;
+        if(worldMap.isEmpty()) return 0;
         for(long id : worldMap.keySet()) {
             int entityId = worldMap.get(id).getEntityId();
             if(!GameServer.getServerState().getLocalAndRemoteObjectContainer().getLocalUpdatableObjects().containsKey(entityId)) {
@@ -76,7 +84,7 @@ public class UniverseDatabase {
         PersistentObjectUtil.save(instance.getSkeleton());
     }
 
-    public static void saveData(WorldEntity entity) {
+    public static void saveData(Planet entity) {
         saveData(entity.toWorldData());
     }
 

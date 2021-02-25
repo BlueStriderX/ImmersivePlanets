@@ -2,9 +2,9 @@ package thederpgamer.immersiveplanets.data.world;
 
 import api.common.GameCommon;
 import org.schema.common.util.linAlg.Vector3i;
+import org.schema.game.common.controller.Planet;
 import thederpgamer.immersiveplanets.graphics.model.WorldDrawData;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
-import thederpgamer.immersiveplanets.universe.space.world.WorldEntity;
 import java.io.Serializable;
 
 /**
@@ -52,8 +52,8 @@ public class WorldData implements Serializable {
         return new Vector3i(sector[0], sector[1], sector[2]);
     }
 
-    public WorldEntity toEntity() {
-        return (WorldEntity) GameCommon.getGameObject(getEntityId());
+    public Planet toEntity() {
+        return (Planet) GameCommon.getGameObject(getEntityId());
     }
 
     public WorldDrawData getDrawData() {
