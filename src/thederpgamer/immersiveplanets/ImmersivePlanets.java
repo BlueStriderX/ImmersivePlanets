@@ -12,14 +12,15 @@ import api.utils.textures.StarLoaderTexture;
 import org.apache.commons.io.IOUtils;
 import org.schema.schine.graphicsengine.core.Controller;
 import org.schema.schine.graphicsengine.core.ResourceException;
+import org.schema.schine.graphicsengine.forms.Sprite;
 import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
-import thederpgamer.immersiveplanets.graphics.texture.TextureLoader;
 import thederpgamer.immersiveplanets.graphics.universe.WorldEntityDrawer;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 import javax.imageio.ImageIO;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.ProtectionDomain;
+import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -42,6 +43,7 @@ public class ImmersivePlanets extends StarMod {
     //Data
     public WorldEntityDrawer worldEntityDrawer;
     private final String texturePath = "thederpgamer/immersiveplanets/resources/textures/planet/";
+    public HashMap<String, Sprite> spriteMap = new HashMap<>();
 
     //Config
     private final String[] defaultConfig = {
@@ -127,7 +129,7 @@ public class ImmersivePlanets extends StarMod {
                             };
 
                             for(String imageName : imageNames) {
-                                TextureLoader.addSprite(StarLoaderTexture.newSprite(ImageIO.read(getJarResource(texturePath + imageName + ".png")), ImmersivePlanets.getInstance(), imageName));
+                                spriteMap.put(imageName, StarLoaderTexture.newSprite(ImageIO.read(getJarResource(texturePath + imageName + ".png")), ImmersivePlanets.getInstance(), imageName));
                             }
                         }
                     } catch(IOException e) {

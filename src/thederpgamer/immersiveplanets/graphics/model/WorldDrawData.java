@@ -11,7 +11,6 @@ import org.schema.schine.graphicsengine.forms.Sprite;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.world.WorldData;
 import thederpgamer.immersiveplanets.graphics.other.BoundingSphere;
-import thederpgamer.immersiveplanets.graphics.texture.TextureLoader;
 import thederpgamer.immersiveplanets.graphics.universe.WorldDrawMode;
 
 /**
@@ -49,16 +48,16 @@ public class WorldDrawData implements Drawable {
         cloudLayer = Controller.getResLoader().getMeshLoader().getModMesh(ImmersivePlanets.getInstance(), "planet_sphere");
         atmosphereSimple = (Mesh) Controller.getResLoader().getMesh("Sphere").getChilds().iterator().next();
 
-        (atmosphereTexture = TextureLoader.getSprite(worldData.getWorldType().name + "_atmosphere")).onInit();
-        (cloudTexture = TextureLoader.getSprite(worldData.getWorldType().name + "_clouds")).onInit();
+        (atmosphereTexture = ImmersivePlanets.getInstance().spriteMap.get(worldData.getWorldType().name + "_atmosphere")).onInit();
+        (cloudTexture = ImmersivePlanets.getInstance().spriteMap.get(worldData.getWorldType().name + "_clouds")).onInit();
 
         debugOuterSphere = new BoundingSphere(radius);
         debugInnerSphere = new BoundingSphere(radius * 0.95f);
 
         sprites = new Sprite[] {
-                TextureLoader.getSprite(worldData.getWorldType().name + "_64"),
-                TextureLoader.getSprite(worldData.getWorldType().name + "_256"),
-                TextureLoader.getSprite(worldData.getWorldType().name + "_512")
+                ImmersivePlanets.getInstance().spriteMap.get(worldData.getWorldType().name + "_64"),
+                ImmersivePlanets.getInstance().spriteMap.get(worldData.getWorldType().name + "_256"),
+                ImmersivePlanets.getInstance().spriteMap.get(worldData.getWorldType().name + "_512")
         };
     }
 
