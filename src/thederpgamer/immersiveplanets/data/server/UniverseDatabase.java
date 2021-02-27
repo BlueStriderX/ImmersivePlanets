@@ -1,5 +1,6 @@
 package thederpgamer.immersiveplanets.data.server;
 
+import api.common.GameCommon;
 import api.common.GameServer;
 import api.mod.config.PersistentObjectUtil;
 import org.schema.common.util.linAlg.Vector3i;
@@ -59,7 +60,7 @@ public class UniverseDatabase {
         if(worldMap.isEmpty()) return 0;
         for(long id : worldMap.keySet()) {
             int entityId = worldMap.get(id).getEntityId();
-            if(!GameServer.getServerState().getLocalAndRemoteObjectContainer().getLocalUpdatableObjects().containsKey(entityId)) {
+            if(GameCommon.getGameObject(entityId) == null || !GameCommon.getGameObject(entityId).isOnServer()) {
                 toRemove.add(id);
                 if(toRemove.size() == 1) worldId = id;
             }

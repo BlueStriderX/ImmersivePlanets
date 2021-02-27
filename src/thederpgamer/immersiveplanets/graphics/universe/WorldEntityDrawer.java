@@ -22,17 +22,17 @@ public class WorldEntityDrawer implements Drawable {
 
     @Override
     public void onInit() {
-
+        for(WorldDrawData world : worlds) if(world != null) world.onInit();
     }
 
     @Override
     public void draw() {
-
+        for(WorldDrawData world : worlds) if(world != null) world.draw();
     }
 
     @Override
     public void cleanUp() {
-
+        for(WorldDrawData world : worlds) if(world != null) world.cleanUp();
     }
 
     @Override
@@ -41,9 +41,14 @@ public class WorldEntityDrawer implements Drawable {
     }
 
     public void addDrawData(WorldDrawData drawData) {
+        for(WorldDrawData world : worlds) {
+            if(world != null && world.getWorldId() == drawData.getWorldId()) return;
+        }
+
         for(int i = 0; i < worlds.length; i ++) {
-            if(worlds[i].getDrawMode().equals(WorldDrawMode.NONE)) {
+            if(worlds[i] == null || worlds[i].getDrawMode().equals(WorldDrawMode.NONE)) {
                 worlds[i] = drawData;
+                worlds[i].onInit();
                 return;
             }
         }

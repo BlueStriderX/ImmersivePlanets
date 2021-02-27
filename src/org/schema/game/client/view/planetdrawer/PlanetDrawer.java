@@ -101,9 +101,11 @@ public class PlanetDrawer implements Drawable {
         }
 
         WorldData worldData;
-        if((worldData = UniverseDatabase.getFromSector(this.relSectorPos)) != null) {
+        if((worldData = UniverseDatabase.getFromSector(this.absSecPos)) != null) {
             ImmersivePlanets.getInstance().worldEntityDrawer.addDrawData(worldData.getDrawData());
         }
+
+        ImmersivePlanets.getInstance().worldEntityDrawer.draw();
 
         if (!Controller.getCamera().isBoundingSphereInFrustrum(this.trans.origin, this.dodecahedron.radius + 50.0F)) {
             ++culled;

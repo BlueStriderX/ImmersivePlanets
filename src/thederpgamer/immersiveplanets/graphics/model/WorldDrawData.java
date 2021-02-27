@@ -48,8 +48,8 @@ public class WorldDrawData implements Drawable {
         cloudLayer = Controller.getResLoader().getMeshLoader().getModMesh(ImmersivePlanets.getInstance(), "planet_sphere");
         atmosphereSimple = (Mesh) Controller.getResLoader().getMesh("Sphere").getChilds().iterator().next();
 
-        (atmosphereTexture = ImmersivePlanets.getInstance().spriteMap.get(worldData.getWorldType().name + "_atmosphere")).onInit();
-        (cloudTexture = ImmersivePlanets.getInstance().spriteMap.get(worldData.getWorldType().name + "_clouds")).onInit();
+        atmosphereTexture = ImmersivePlanets.getInstance().spriteMap.get(worldData.getWorldType().name + "_atmosphere");
+        cloudTexture = ImmersivePlanets.getInstance().spriteMap.get(worldData.getWorldType().name + "_clouds");
 
         debugOuterSphere = new BoundingSphere(radius);
         debugInnerSphere = new BoundingSphere(radius * 0.95f);
@@ -63,6 +63,8 @@ public class WorldDrawData implements Drawable {
 
     @Override
     public void onInit() {
+        atmosphereTexture.onInit();
+        cloudTexture.onInit();
         atmosphereLayer.setMaterial(atmosphereTexture.getMaterial());
         cloudLayer.setMaterial(cloudTexture.getMaterial());
         debugOuterSphere.onInit();
