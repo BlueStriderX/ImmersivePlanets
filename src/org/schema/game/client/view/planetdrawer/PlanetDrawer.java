@@ -28,6 +28,7 @@ import org.schema.schine.graphicsengine.shader.Shaderable;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
 import thederpgamer.immersiveplanets.data.world.WorldData;
+import thederpgamer.immersiveplanets.graphics.model.WorldDrawData;
 
 /**
  * PlanetDrawer.java
@@ -102,7 +103,10 @@ public class PlanetDrawer implements Drawable {
 
         WorldData worldData;
         if((worldData = UniverseDatabase.getFromSector(this.absSecPos)) != null) {
-            ImmersivePlanets.getInstance().worldEntityDrawer.addDrawData(worldData.getDrawData());
+            WorldDrawData drawData = worldData.getDrawData();
+            drawData.setPos(this.transR.origin);
+            drawData.setScale(new Vector3f(sphere.getScale().x * 10.0f, sphere.getScale().y * 10.0f, sphere.getScale().z * 10.0f));
+            ImmersivePlanets.getInstance().worldEntityDrawer.addDrawData(drawData);
         }
 
         ImmersivePlanets.getInstance().worldEntityDrawer.draw();

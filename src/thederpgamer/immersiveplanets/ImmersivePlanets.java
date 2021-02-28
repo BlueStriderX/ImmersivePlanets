@@ -16,6 +16,7 @@ import org.schema.schine.graphicsengine.forms.Sprite;
 import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
 import thederpgamer.immersiveplanets.graphics.universe.WorldEntityDrawer;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
+
 import javax.imageio.ImageIO;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -29,13 +30,19 @@ import java.util.zip.ZipInputStream;
  * ImmersivePlanets main class
  * ==================================================
  * Created 02/12/2021
+ *
  * @author TheDerpGamer
  */
 public class ImmersivePlanets extends StarMod {
 
-    public ImmersivePlanets() { }
-    public static void main(String[] args) { }
+    public ImmersivePlanets() {
+    }
+
+    public static void main(String[] args) {
+    }
+
     private static ImmersivePlanets instance;
+
     public static ImmersivePlanets getInstance() {
         return instance;
     }
@@ -65,13 +72,12 @@ public class ImmersivePlanets extends StarMod {
         instance = this;
         initConfig();
         initialize();
-        loadTextures();
         registerEventListeners();
     }
 
     @Override
     public byte[] onClassTransform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] byteCode) {
-        if(className.endsWith("PlanetCreatorThread") || className.endsWith("PlanetCore") || className.endsWith("PlanetDrawer") || className.endsWith("PlanetShaderable") || className.endsWith("AtmoShaderable")) {
+        if (className.endsWith("PlanetCreatorThread") || className.endsWith("PlanetCore") || className.endsWith("PlanetDrawer") || className.endsWith("PlanetShaderable") || className.endsWith("AtmoShaderable")) {
             return overwriteClass(className, byteCode);
         } else {
             return super.onClassTransform(loader, className, classBeingRedefined, protectionDomain, byteCode);
@@ -79,23 +85,41 @@ public class ImmersivePlanets extends StarMod {
     }
 
     @Override
-    public void onLoadModels() {
-        String[] models = new String[] {
-                "planet_sphere"
-        };
+    public void onUniversalRegistryLoad() {
+        StarLoaderTexture.runOnGraphicsThread(new Runnable() {
+            @Override
+            public void run() {
+                String[] models = new String[]{
+                        "planet_sphere"
+                };
 
-        for(final String model : models) {
-            StarLoaderTexture.runOnGraphicsThread(new Runnable() {
-                @Override
-                public void run() {
+                for(String model : models) {
                     try {
                         Controller.getResLoader().getMeshLoader().loadModMesh(ImmersivePlanets.getInstance(), model, getJarResource("thederpgamer/immersiveplanets/resources/models/planet/" + model + ".zip"), null);
-                    } catch(ResourceException | IOException e) {
+                    } catch (ResourceException | IOException e) {
                         e.printStackTrace();
                     }
                 }
-            });
-        }
+
+                for (WorldType worldType : WorldType.values()) {
+                    String[] imageNames = {
+                            worldType.name + "_atmosphere",
+                            worldType.name + "_clouds",
+                            worldType.name + "_64",
+                            worldType.name + "_256",
+                            worldType.name + "_512"
+                    };
+
+                    for (String imageName : imageNames) {
+                        try {
+                            spriteMap.put(imageName, StarLoaderTexture.newSprite(ImageIO.read(getJarResource(texturePath + imageName + ".png")), ImmersivePlanets.getInstance(), imageName));
+                        } catch (IOException exception) {
+                            exception.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
     }
 
     private void initConfig() {
@@ -104,40 +128,13 @@ public class ImmersivePlanets extends StarMod {
 
         debugMode = config.getConfigurableBoolean("debug-mode", false);
         instancedSectorDist = config.getConfigurableInt("instanced-sector-dist", 10000);
-        if(instancedSectorDist < 5000) {
+        if (instancedSectorDist < 5000) {
             config.set("instanced-sector-dist", 5000);
             instancedSectorDist = 5000;
         }
         maxPlanetsDrawn = config.getConfigurableInt("max-planets-drawn", 5);
 
         config.saveConfig();
-    }
-
-    private void loadTextures() {
-        StarLoaderTexture.runOnGraphicsThread(new Runnable() {
-            @Override
-            public void run() {
-                synchronized(ImmersivePlanets.class) {
-                    try {
-                        for(WorldType worldType : WorldType.values()) {
-                            String[] imageNames = {
-                                    worldType.name + "_atmosphere",
-                                    worldType.name + "_clouds",
-                                    worldType.name + "_64",
-                                    worldType.name + "_256",
-                                    worldType.name + "_512"
-                            };
-
-                            for(String imageName : imageNames) {
-                                spriteMap.put(imageName, StarLoaderTexture.newSprite(ImageIO.read(getJarResource(texturePath + imageName + ".png")), ImmersivePlanets.getInstance(), imageName));
-                            }
-                        }
-                    } catch(IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
     }
 
     private void initialize() {
@@ -173,16 +170,16 @@ public class ImmersivePlanets extends StarMod {
             ZipInputStream file = new ZipInputStream(new FileInputStream(this.getSkeleton().getJarFile()));
             while (true) {
                 ZipEntry nextEntry = file.getNextEntry();
-                if(nextEntry == null) break;
-                if(nextEntry.getName().endsWith(className + ".class")) {
+                if (nextEntry == null) break;
+                if (nextEntry.getName().endsWith(className + ".class")) {
                     bytes = IOUtils.toByteArray(file);
                 }
             }
             file.close();
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        if(bytes != null) {
+        if (bytes != null) {
             DebugFile.log("[ImmersivePlanets]: Overwrote Class " + className, this);
             return bytes;
         } else {

@@ -12,6 +12,7 @@ import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.world.WorldData;
 import thederpgamer.immersiveplanets.graphics.other.BoundingSphere;
 import thederpgamer.immersiveplanets.graphics.universe.WorldDrawMode;
+import javax.vecmath.Vector3f;
 
 /**
  * WorldDrawData.java
@@ -23,6 +24,8 @@ import thederpgamer.immersiveplanets.graphics.universe.WorldDrawMode;
 public class WorldDrawData implements Drawable {
 
     private Vector3i sector;
+    private Vector3f pos;
+    private Vector3f scale;
     private float radius;
     private long worldId;
 
@@ -43,6 +46,8 @@ public class WorldDrawData implements Drawable {
         radius = worldData.getRadius();
         worldId = worldData.getWorldId();
         sector = worldData.getSector();
+        pos = new Vector3f();
+        scale = new Vector3f(1, 1, 1);
 
         atmosphereLayer = Controller.getResLoader().getMeshLoader().getModMesh(ImmersivePlanets.getInstance(), "planet_sphere");
         cloudLayer = Controller.getResLoader().getMeshLoader().getModMesh(ImmersivePlanets.getInstance(), "planet_sphere");
@@ -70,6 +75,7 @@ public class WorldDrawData implements Drawable {
         debugOuterSphere.onInit();
         debugInnerSphere.onInit();
         updaterStarted = false;
+        updateDraw();
     }
 
     @Override
@@ -81,33 +87,53 @@ public class WorldDrawData implements Drawable {
             cleanupSprites();
             if(drawDebugSpheres()) {
                 cleanupSpheres();
+                debugOuterSphere.setPosition(pos);
+                debugInnerSphere.setPosition(pos);
+
                 debugOuterSphere.draw();
                 debugInnerSphere.draw();
             } else {
                 cleanupDebug();
+                atmosphereLayer.setPos(pos);
+                cloudLayer.setPos(pos);
+
+                atmosphereLayer.setScale(scale);
+                cloudLayer.setScale(scale.x * 1.05f, scale.y * 1.05f, scale.z * 1.05f);
+
                 atmosphereLayer.draw();
-                cloudLayer.draw();
+                //cloudLayer.draw();
             }
         } else if(drawMode.equals(WorldDrawMode.SPHERE_HALF)) {
             cleanupSprites();
             atmosphereLayer.cleanUp();
             cloudLayer.cleanUp();
+
+            atmosphereSimple.setPos(pos);
             atmosphereSimple.draw();
         } else if(drawMode.equals(WorldDrawMode.SPRITE_512)) {
             cleanupDebug();
             cleanupSpheres();
+
+            sprites[2].setPos(pos);
+
             sprites[0].cleanUp();
             sprites[1].cleanUp();
             sprites[2].draw();
         } else if(drawMode.equals(WorldDrawMode.SPRITE_256)) {
             cleanupDebug();
             cleanupSpheres();
+
+            sprites[1].setPos(pos);
+
             sprites[0].cleanUp();
             sprites[1].draw();
             sprites[2].cleanUp();
         } else if(drawMode.equals(WorldDrawMode.SPRITE_64)) {
             cleanupDebug();
             cleanupSpheres();
+
+            sprites[0].setPos(pos);
+
             sprites[0].draw();
             sprites[1].cleanUp();
             sprites[2].cleanUp();
@@ -178,5 +204,21 @@ public class WorldDrawData implements Drawable {
 
     public long getWorldId() {
         return worldId;
+    }
+
+    public void setPos(Vector3f pos) {
+        this.pos = pos;
+    }
+
+    public Vector3f getPos() {
+        return pos;
+    }
+
+    public Vector3f getScale() {
+        return scale;
+    }
+
+    public void setScale(Vector3f scale) {
+        this.scale = scale;
     }
 }
