@@ -8,7 +8,7 @@ import org.schema.game.common.data.world.Sector;
 import org.schema.game.common.data.world.space.PlanetCore;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.world.WorldData;
-import thederpgamer.immersiveplanets.graphics.model.WorldDrawData;
+import thederpgamer.immersiveplanets.graphics.universe.WorldDrawData;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 import java.util.ArrayList;
 import java.util.HashMap;

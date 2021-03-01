@@ -2,7 +2,6 @@ package thederpgamer.immersiveplanets;
 
 import api.DebugFile;
 import api.listener.Listener;
-import api.listener.events.draw.RegisterWorldDrawersEvent;
 import api.listener.events.world.PlanetCreateEvent;
 import api.mod.StarLoader;
 import api.mod.StarMod;
@@ -10,13 +9,11 @@ import api.mod.config.FileConfiguration;
 import api.utils.StarRunnable;
 import api.utils.textures.StarLoaderTexture;
 import org.apache.commons.io.IOUtils;
-import org.schema.schine.graphicsengine.core.Controller;
 import org.schema.schine.graphicsengine.core.ResourceException;
 import org.schema.schine.graphicsengine.forms.Sprite;
+import org.schema.schine.resource.ResourceLoader;
 import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
-import thederpgamer.immersiveplanets.graphics.universe.WorldEntityDrawer;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
-
 import javax.imageio.ImageIO;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,19 +45,16 @@ public class ImmersivePlanets extends StarMod {
     }
 
     //Data
-    public WorldEntityDrawer worldEntityDrawer;
     private final String texturePath = "thederpgamer/immersiveplanets/resources/textures/planet/";
     public HashMap<String, Sprite> spriteMap = new HashMap<>();
 
     //Config
     private final String[] defaultConfig = {
             "debug-mode: false",
-            "instanced-sector-dist: 10000",
-            "max-planets-drawn: 5"
+            "instanced-sector-dist: 10000"
     };
     public boolean debugMode = false;
     public int instancedSectorDist = 10000;
-    public int maxPlanetsDrawn = 5;
 
     @Override
     public void onLoad() {
@@ -85,41 +79,27 @@ public class ImmersivePlanets extends StarMod {
     }
 
     @Override
-    public void onUniversalRegistryLoad() {
-        StarLoaderTexture.runOnGraphicsThread(new Runnable() {
-            @Override
-            public void run() {
-                String[] models = new String[]{
-                        "planet_sphere"
-                };
+    public void onResourceLoad(ResourceLoader loader) {
+        String[] models = {
+                "planet_sphere"
+        };
 
-                for(String model : models) {
-                    try {
-                        Controller.getResLoader().getMeshLoader().loadModMesh(ImmersivePlanets.getInstance(), model, getJarResource("thederpgamer/immersiveplanets/resources/models/planet/" + model + ".zip"), null);
-                    } catch (ResourceException | IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                for (WorldType worldType : WorldType.values()) {
-                    String[] imageNames = {
-                            worldType.name + "_atmosphere",
-                            worldType.name + "_clouds",
-                            worldType.name + "_64",
-                            worldType.name + "_256",
-                            worldType.name + "_512"
-                    };
-
-                    for (String imageName : imageNames) {
-                        try {
-                            spriteMap.put(imageName, StarLoaderTexture.newSprite(ImageIO.read(getJarResource(texturePath + imageName + ".png")), ImmersivePlanets.getInstance(), imageName));
-                        } catch (IOException exception) {
-                            exception.printStackTrace();
-                        }
-                    }
-                }
+        for (String model : models) {
+            try {
+                loader.getMeshLoader().loadModMesh(ImmersivePlanets.getInstance(), model, getJarResource("thederpgamer/immersiveplanets/resources/models/planet/" + model + ".zip"), null);
+            } catch (ResourceException | IOException e) {
+                e.printStackTrace();
             }
-        });
+        }
+
+        for (WorldType worldType : WorldType.values()) {
+            try {
+                String imageName = worldType.name + "_texture";
+                spriteMap.put(imageName, StarLoaderTexture.newSprite(ImageIO.read(getJarResource(texturePath + imageName + ".png")), ImmersivePlanets.getInstance(), imageName));
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
     }
 
     private void initConfig() {
@@ -132,7 +112,6 @@ public class ImmersivePlanets extends StarMod {
             config.set("instanced-sector-dist", 5000);
             instancedSectorDist = 5000;
         }
-        maxPlanetsDrawn = config.getConfigurableInt("max-planets-drawn", 5);
 
         config.saveConfig();
     }
@@ -149,13 +128,6 @@ public class ImmersivePlanets extends StarMod {
     }
 
     private void registerEventListeners() {
-        StarLoader.registerListener(RegisterWorldDrawersEvent.class, new Listener<RegisterWorldDrawersEvent>() {
-            @Override
-            public void onEvent(RegisterWorldDrawersEvent event) {
-                event.getModDrawables().add(worldEntityDrawer = new WorldEntityDrawer());
-            }
-        }, this);
-
         StarLoader.registerListener(PlanetCreateEvent.class, new Listener<PlanetCreateEvent>() {
             @Override
             public void onEvent(PlanetCreateEvent event) {

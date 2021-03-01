@@ -4,7 +4,7 @@ import api.common.GameCommon;
 import org.schema.common.util.linAlg.Vector3i;
 import org.schema.game.common.data.world.space.PlanetCore;
 import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
-import thederpgamer.immersiveplanets.graphics.model.WorldDrawData;
+import thederpgamer.immersiveplanets.graphics.universe.WorldDrawData;
 import thederpgamer.immersiveplanets.universe.generation.world.WorldType;
 import java.io.Serializable;
 

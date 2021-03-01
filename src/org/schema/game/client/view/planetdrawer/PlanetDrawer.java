@@ -1,6 +1,5 @@
 package org.schema.game.client.view.planetdrawer;
 
-import api.DebugFile;
 import api.listener.fastevents.FastListenerCommon;
 import api.listener.fastevents.PlanetDrawListener;
 import com.bulletphysics.linearmath.Transform;
@@ -28,7 +27,7 @@ import org.schema.schine.graphicsengine.shader.Shaderable;
 import thederpgamer.immersiveplanets.ImmersivePlanets;
 import thederpgamer.immersiveplanets.data.server.UniverseDatabase;
 import thederpgamer.immersiveplanets.data.world.WorldData;
-import thederpgamer.immersiveplanets.graphics.model.WorldDrawData;
+import thederpgamer.immersiveplanets.graphics.universe.WorldDrawData;
 
 /**
  * PlanetDrawer.java
@@ -101,16 +100,6 @@ public class PlanetDrawer implements Drawable {
             this.trans.origin.set(this.absSectorCenterPos);
         }
 
-        WorldData worldData;
-        if((worldData = UniverseDatabase.getFromSector(this.absSecPos)) != null) {
-            WorldDrawData drawData = worldData.getDrawData();
-            drawData.setPos(this.transR.origin);
-            drawData.setScale(new Vector3f(sphere.getScale().x * 10.0f, sphere.getScale().y * 10.0f, sphere.getScale().z * 10.0f));
-            ImmersivePlanets.getInstance().worldEntityDrawer.addDrawData(drawData);
-        }
-
-        ImmersivePlanets.getInstance().worldEntityDrawer.draw();
-
         if (!Controller.getCamera().isBoundingSphereInFrustrum(this.trans.origin, this.dodecahedron.radius + 50.0F)) {
             ++culled;
         } else {
@@ -144,7 +133,7 @@ public class PlanetDrawer implements Drawable {
             if (!this.relSectorPos.equals(0, 0, 0)) {
                 ShaderLibrary.planetShader.setShaderInterface(this.planetShaderable);
                 ShaderLibrary.planetShader.load();
-                this.dodecahedron.draw();
+                //this.dodecahedron.draw();
                 ShaderLibrary.planetShader.unload();
             }
 
@@ -165,7 +154,7 @@ public class PlanetDrawer implements Drawable {
             GlUtil.scaleModelview(1.0F / var5, 1.0F / var5, 1.0F / var5);
             GlUtil.scaleModelview(var6, var6, var6);
             GL11.glCullFace(1029);
-            this.sphere.renderVBO();
+            //this.sphere.renderVBO();
             GL11.glCullFace(1029);
             ShaderLibrary.atmosphereShader.unload();
             GlUtil.glEnable(2929);
@@ -175,6 +164,15 @@ public class PlanetDrawer implements Drawable {
             GL11.glDepthRange(0.0D, 1.0D);
             GlUtil.glDepthMask(true);
             this.sphere.unloadVBO(true);
+
+            WorldData worldData;
+            if((worldData = UniverseDatabase.getFromSector(this.absSecPos)) != null) {
+                WorldDrawData drawData = worldData.getDrawData();
+                drawData.setScale(new Vector3f(worldData.getRadius(), worldData.getRadius(), worldData.getRadius()));
+                drawData.setPos(trans.origin);
+                drawData.draw();
+            }
+
             //INSERTED CODE @197
             for(PlanetDrawListener drawListener : FastListenerCommon.planetDrawListeners) {
                 drawListener.onPlanetDraw(absSecPos, infos, type, sphere, dodecahedron);
